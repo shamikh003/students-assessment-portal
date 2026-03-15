@@ -26,6 +26,22 @@ st.markdown("""
         background: linear-gradient(135deg, #f5f7fa 0%, #e4e9f2 100%);
     }
     
+    /* ======== INVISIBLE TEXT FIX (Overrides Streamlit Dark Mode) ======== */
+    .block-container p, 
+    .block-container span, 
+    .block-container label, 
+    div[data-testid="stMarkdownContainer"] p {
+        color: #2c3e50 !important;
+    }
+    /* Protect buttons and active tabs from becoming dark */
+    .stButton > button, .stButton > button p, .stButton > button span {
+        color: white !important;
+    }
+    .stTabs [aria-selected="true"], .stTabs [aria-selected="true"] p, .stTabs [aria-selected="true"] span {
+        color: white !important;
+    }
+    /* ==================================================================== */
+
     h3 { color: #2c3e50 !important; font-weight: 600 !important; letter-spacing: -0.5px !important; margin-top: 0 !important; padding-top: 0 !important;}
     h4 { font-weight: 500 !important; }
     
@@ -37,11 +53,10 @@ st.markdown("""
         background-color: #f8f9fa !important;
         transition: all 0.3s ease !important;
         text-align: center !important; 
+        color: #2c3e50 !important; /* Force input text color */
     }
-    /* Input Box Focus Color Updated to #ff2828 */
     .stTextInput > div > div > input:focus { border-color: #ff2828 !important; background-color: #ffffff !important; box-shadow: 0 0 0 4px rgba(255, 40, 40, 0.1) !important; }
     
-    /* Button Color Updated to #ff2828 */
     .stButton > button {
         background: linear-gradient(45deg, #ff2828, #ff4d4d) !important; color: white !important; border-radius: 12px !important;
         font-weight: 600 !important; letter-spacing: 0.5px !important; font-size: 16px !important; padding: 14px !important;
@@ -50,12 +65,10 @@ st.markdown("""
     .stButton > button:hover { transform: translateY(-3px) !important; box-shadow: 0 8px 25px rgba(255, 40, 40, 0.35) !important; }
     
     .stTabs [data-baseweb="tab-list"] { gap: 8px; padding-bottom: 5px; }
-    .stTabs [data-baseweb="tab"] { background-color: #f1f3f5; border-radius: 8px; padding: 10px 18px; color: #495057; font-weight: 500; border: none; }
-    /* Active Tab Color Updated to #ff2828 */
+    .stTabs [data-baseweb="tab"] { background-color: #f1f3f5; border-radius: 8px; padding: 10px 18px; color: #495057 !important; font-weight: 500; border: none; }
     .stTabs [aria-selected="true"] { background-color: #ff2828 !important; color: white !important; box-shadow: 0 4px 10px rgba(255, 40, 40, 0.2) !important; }
 
-    .stTextArea textarea { border-radius: 12px !important; border: 2px solid #e1e8ed !important; padding: 15px !important; background-color: #fbfbfc !important; }
-    /* Text Area Focus Color Updated to #ff2828 */
+    .stTextArea textarea { border-radius: 12px !important; border: 2px solid #e1e8ed !important; padding: 15px !important; background-color: #fbfbfc !important; color: #2c3e50 !important; }
     .stTextArea textarea:focus { border-color: #ff2828 !important; box-shadow: 0 0 0 4px rgba(255, 40, 40, 0.1) !important; }
     </style>
 """, unsafe_allow_html=True)
@@ -222,7 +235,7 @@ else:
     header_col1, header_col2 = st.columns([5.5, 1.5], gap="small")
     
     with header_col1:
-        st.markdown(f"<h3 style='margin-top: 5px !important; margin-bottom: 0px !important;'>👋 Welcome, {st.session_state.candidate_name}</h3>", unsafe_allow_html=True)
+        st.markdown(f"<h3 style='margin-top: 5px !important; margin-bottom: 0px !important;'> Welcome, {st.session_state.candidate_name}</h3>", unsafe_allow_html=True)
     
     with header_col2:
         if os.path.exists("logo.png"):
@@ -299,10 +312,10 @@ else:
             else: st.session_state.show_confirm = True
 
     if st.session_state.show_confirm:
-        st.warning("⚠️ Are you sure you want to submit your final answers?")
+        st.warning(" Are you sure you want to submit your final answers?")
         confirm_col1, confirm_col2 = st.columns([1, 1])
         with confirm_col1:
-            if st.button("✔️ Yes, Submit", type="primary", use_container_width=True):
+            if st.button(" Yes, Submit", type="primary", use_container_width=True):
                 with st.spinner("Submitting assessment..."):
                     try:
                         end_time = time.time()
@@ -318,13 +331,13 @@ else:
                         email_status = send_email_to_boss(st.session_state.candidate_name, typing_accuracy, wpm, time_taken_seconds, mcq_score, ai_result)
                         
                         if email_status == "Success":
-                            st.success("🎉 Assessment submitted successfully!")
+                            st.success(" Assessment submitted successfully!")
                             st.session_state.show_confirm = False
                         else:
-                            st.error(f"❌ Email failed. Error: {email_status}")
+                            st.error(f" Email failed. Error: {email_status}")
                     except Exception as e:
-                        st.error(f"❌ System Error: {e}")
+                        st.error(f" System Error: {e}")
         with confirm_col2:
-            if st.button("❌ Cancel", use_container_width=True):
+            if st.button(" Cancel", use_container_width=True):
                 st.session_state.show_confirm = False
                 st.rerun()
