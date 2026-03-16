@@ -248,7 +248,6 @@ if not st.session_state.test_started:
             else:
                 st.session_state.candidate_name = name_input
                 st.session_state.test_started = True
-                # Start hote hi random paragraph select karo
                 st.session_state.assigned_paragraph = random.choice(typing_paragraphs)
                 st.rerun()
 
@@ -304,7 +303,7 @@ else:
 
     with tab1:
         st.write("#### Typing Assessment (3 Minutes)")
-        st.write("*Note: You can submit the assessment anytime even before the timer ends.*")
+        st.write("*Note: Type the text, then click anywhere outside the box to update your progress.*")
         if not st.session_state.typing_started:
             st.info("Click the button below to start the timer. The text will appear, and you will have 3 minutes to type it accurately.")
             if st.button("Start Typing Test", type="primary"):
@@ -317,7 +316,6 @@ else:
             col_a, col_b = st.columns([3, 1])
             with col_a: st.write("**Type the text below exactly as it appears:**")
             with col_b:
-                # Dynamic timer logic based on paragraph length (margin of error: 10 chars)
                 target_length = len(st.session_state.assigned_paragraph) - 10 
                 
                 timer_html = f"""
@@ -383,8 +381,20 @@ else:
 
     st.write("<br>", unsafe_allow_html=True)
 
-    # --- TEST COMPLETION CHECK LOGIC ---
-    is_typing_done = st.session_state.typing_started and len(typing_input.strip()) > 0
+    # --- NEW STRICT TEST COMPLETION CHECK LOGIC ---
+    if st.session_state.typing_started:
+        elapsed_time = time.time() - st.session_state.start_time
+        target_para_len = len(st.session_state.assigned_paragraph) - 15 if st.session_state.assigned_paragraph else 9999
+        
+        # Condition 1: Has the candidate reached the 3-minute mark?
+        is_time_up = elapsed_time >= 180
+        # Condition 2: Has the candidate completely typed the paragraph?
+        is_text_finished = len(typing_input.strip()) >= target_para_len
+        
+        is_typing_done = is_time_up or is_text_finished
+    else:
+        is_typing_done = False
+
     is_email_done = len(email_draft.strip()) > 0
     is_forwarding_done = len(forwarding_logic.strip()) > 0
 
@@ -396,8 +406,12 @@ else:
     
     t_col1, t_col2, t_col3, t_col4 = st.columns(4)
     with t_col1:
-        status_col = "#27ae60" if is_typing_done else "#e74c3c"
-        status_txt = "Completed" if is_typing_done else "Pending"
+        if is_typing_done:
+            status_col, status_txt = "#27ae60", "Completed"
+        elif st.session_state.typing_started:
+            status_col, status_txt = "#f39c12", "In Progress"
+        else:
+            status_col, status_txt = "#e74c3c", "Pending"
         st.markdown(f"<div style='text-align:center; font-size:14px; color:#2c3e50; font-weight:600;'><span style='color:{status_col};'>{status_txt}</span><br>Typing Test</div>", unsafe_allow_html=True)
     
     with t_col2:
