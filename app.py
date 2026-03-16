@@ -26,23 +26,24 @@ st.markdown("""
         background: linear-gradient(135deg, #f5f7fa 0%, #e4e9f2 100%);
     }
     
-    /* ======== INVISIBLE TEXT FIX (Overrides Streamlit Dark Mode) ======== */
+    /* ======== INVISIBLE TEXT FIX ======== */
     .block-container p, 
     .block-container span, 
     .block-container label, 
     div[data-testid="stMarkdownContainer"] p {
         color: #2c3e50 !important;
     }
-    /* Protect primary buttons and active tabs from becoming dark */
-    .stButton > button[kind="primary"], .stButton > button[kind="primary"] p {
-        color: white !important;
-    }
-    .stTabs [aria-selected="true"], .stTabs [aria-selected="true"] p, .stTabs [aria-selected="true"] span {
-        color: white !important;
-    }
     
-    /* ======== HIDE "PRESS ENTER TO APPLY" TEXT ======== */
-    div[data-testid="InputInstructions"] {
+    /* ======== STRICT HIDE "PRESS ENTER / CTRL+ENTER TO APPLY" ======== */
+    [data-testid="InputInstructions"], 
+    div[data-testid="InputInstructions"],
+    .stTextArea [data-testid="InputInstructions"],
+    .stTextInput [data-testid="InputInstructions"] {
+        display: none !important;
+        visibility: hidden !important;
+        opacity: 0 !important;
+    }
+    .stTextArea small, .stTextInput small {
         display: none !important;
     }
     /* ==================================================================== */
@@ -58,25 +59,53 @@ st.markdown("""
         background-color: #f8f9fa !important;
         transition: all 0.3s ease !important;
         text-align: center !important; 
-        color: #2c3e50 !important; /* Force input text color */
+        color: #2c3e50 !important;
     }
     .stTextInput > div > div > input:focus { border-color: #ff2828 !important; background-color: #ffffff !important; box-shadow: 0 0 0 4px rgba(255, 40, 40, 0.1) !important; }
     
-    /* PRIMARY BUTTON STYLING (Red theme) */
-    .stButton > button[kind="primary"] {
-        background: linear-gradient(45deg, #ff2828, #ff4d4d) !important; color: white !important; border-radius: 12px !important;
-        font-weight: 600 !important; letter-spacing: 0.5px !important; font-size: 16px !important; padding: 14px !important;
-        border: none !important; box-shadow: 0 4px 15px rgba(255, 40, 40, 0.25) !important; transition: all 0.3s ease !important;
+    /* ======== PRIMARY BUTTON STYLING (Red theme) ======== */
+    button[kind="primary"], button[data-testid="baseButton-primary"] {
+        background: linear-gradient(45deg, #ff2828, #ff4d4d) !important; 
+        color: white !important; 
+        border-radius: 12px !important;
+        font-weight: 600 !important; 
+        letter-spacing: 0.5px !important; 
+        font-size: 16px !important; 
+        padding: 14px !important;
+        border: none !important; 
+        box-shadow: 0 4px 15px rgba(255, 40, 40, 0.25) !important; 
+        transition: all 0.3s ease !important;
     }
-    .stButton > button[kind="primary"]:hover { transform: translateY(-3px) !important; box-shadow: 0 8px 25px rgba(255, 40, 40, 0.35) !important; }
+    button[kind="primary"]:hover, button[data-testid="baseButton-primary"]:hover { 
+        transform: translateY(-3px) !important; 
+        box-shadow: 0 8px 25px rgba(255, 40, 40, 0.35) !important; 
+    }
+    button[kind="primary"] p, button[data-testid="baseButton-primary"] p {
+        color: white !important;
+    }
     
-    /* SECONDARY BUTTON STYLING (Cancel Button - Grey & Low Opacity) */
-    .stButton > button[kind="secondary"] {
-        background: transparent !important; color: #7f8c8d !important; border-radius: 12px !important;
-        font-weight: 500 !important; font-size: 16px !important; padding: 14px !important;
-        border: 2px solid #dcdde1 !important; box-shadow: none !important; opacity: 0.6 !important; transition: all 0.3s ease !important;
+    /* ======== SECONDARY BUTTON STYLING (Cancel Button - Grey & Low Opacity) ======== */
+    button[kind="secondary"], button[data-testid="baseButton-secondary"] {
+        background: transparent !important; 
+        color: #7f8c8d !important; 
+        border-radius: 12px !important;
+        font-weight: 600 !important; 
+        font-size: 16px !important; 
+        padding: 14px !important;
+        border: 2px solid #dcdde1 !important; 
+        box-shadow: none !important; 
+        opacity: 0.6 !important; 
+        transition: all 0.3s ease !important;
     }
-    .stButton > button[kind="secondary"]:hover { opacity: 1 !important; background: #f1f3f5 !important; border-color: #95a5a6 !important; }
+    button[kind="secondary"]:hover, button[data-testid="baseButton-secondary"]:hover { 
+        opacity: 1 !important; 
+        background: #f1f3f5 !important; 
+        border-color: #95a5a6 !important; 
+    }
+    button[kind="secondary"] p, button[data-testid="baseButton-secondary"] p {
+        color: #7f8c8d !important;
+    }
+    /* ==================================================================== */
 
     .stTabs [data-baseweb="tab-list"] { gap: 8px; padding-bottom: 5px; }
     .stTabs [data-baseweb="tab"] { background-color: #f1f3f5; border-radius: 8px; padding: 10px 18px; color: #495057 !important; font-weight: 500; border: none; }
@@ -249,7 +278,7 @@ else:
     header_col1, header_col2 = st.columns([5.5, 1.5], gap="small")
     
     with header_col1:
-        st.markdown(f"<h3 style='margin-top: 5px !important; margin-bottom: 0px !important;'> Welcome, {st.session_state.candidate_name}</h3>", unsafe_allow_html=True)
+        st.markdown(f"<h3 style='margin-top: 5px !important; margin-bottom: 0px !important;'>Welcome, {st.session_state.candidate_name}</h3>", unsafe_allow_html=True)
     
     with header_col2:
         if os.path.exists("logo.png"):
@@ -261,7 +290,7 @@ else:
     st.markdown("<hr style='margin: 10px 0px 15px 0px; border: none; border-bottom: 3px solid #ff2828;'>", unsafe_allow_html=True)
 
     # --- 3. CONTENT SECTION ---
-    tab1, tab2, tab3, tab4 = st.tabs(["⌨️ Typing Test", "📝 MCQs", "✉️ Email Drafting", "⚙️ Mail Forwarding"])
+    tab1, tab2, tab3, tab4 = st.tabs(["Typing Test", "MCQs", "Email Drafting", "Mail Forwarding"])
 
     with tab1:
         st.write("#### Typing Assessment (3 Minutes)")
@@ -279,7 +308,7 @@ else:
             with col_b:
                 timer_html = """
                 <div style="text-align: center; font-size: 20px; font-weight: bold; color: white; background: #ff2828; padding: 5px; border-radius: 8px;">
-                    ⏱️ <span id="timer">03:00</span>
+                    Time: <span id="timer">03:00</span>
                 </div>
                 <script>
                     var timeLeft = 180;
@@ -319,15 +348,11 @@ else:
     st.write("<br>", unsafe_allow_html=True)
 
     # --- TEST COMPLETION CHECK LOGIC ---
-    # Check if typing is done
     is_typing_done = st.session_state.typing_started and len(typing_input.strip()) > 0
-    # Check if ALL MCQs have an answer selected
     are_mcqs_done = all(ans is not None for ans in user_mcq_answers)
-    # Check if Email and Forwarding texts are written
     is_email_done = len(email_draft.strip()) > 0
     is_forwarding_done = len(forwarding_logic.strip()) > 0
 
-    # True if candidate has done everything
     all_tasks_completed = is_typing_done and are_mcqs_done and is_email_done and is_forwarding_done
 
     # --- CENTERED SUBMIT BUTTON & POPUP LOGIC ---
@@ -337,14 +362,13 @@ else:
             if st.button("Submit Assessment", type="primary", use_container_width=True):
                 st.session_state.show_confirm = True
         else:
-            # Jab tak test complete nahi hoga, button nahi dikhega, sirf yeh message aayega
-            st.info("ℹ️ Please complete all 4 sections (Typing, MCQs, Email, and Forwarding) to unlock the Submit button.")
+            st.info("Please complete all 4 sections (Typing, MCQs, Email, and Forwarding) to unlock the Submit button.")
 
     if st.session_state.show_confirm:
-        st.warning(" Are you sure you want to submit your final answers?")
+        st.warning("Are you sure you want to submit your final answers?")
         confirm_col1, confirm_col2 = st.columns([1, 1])
         with confirm_col1:
-            if st.button("✔️ Yes, Submit", type="primary", use_container_width=True):
+            if st.button("Yes, Submit", type="primary", use_container_width=True):
                 with st.spinner("Submitting assessment..."):
                     try:
                         end_time = time.time()
@@ -360,23 +384,20 @@ else:
                         email_status = send_email_to_boss(st.session_state.candidate_name, typing_accuracy, wpm, time_taken_seconds, mcq_score, ai_result)
                         
                         if email_status == "Success":
-                            # Success message aur auto return to home page ka logic
-                            st.success("🎉 Assessment submitted successfully! Returning to home page...")
-                            time.sleep(3) # 3 seconds tak message dikhayega
+                            st.success("Assessment submitted successfully! Returning to home page...")
+                            time.sleep(3) 
                             
-                            # Session variables reset ho jayenge
                             st.session_state.test_started = False
                             st.session_state.candidate_name = ""
                             st.session_state.typing_started = False
                             st.session_state.start_time = 0
                             st.session_state.show_confirm = False
-                            st.rerun() # Wapas Screen 1 par bhej dega
+                            st.rerun() 
                         else:
-                            st.error(f" Email failed. Error: {email_status}")
+                            st.error(f"Email failed. Error: {email_status}")
                     except Exception as e:
-                        st.error(f" System Error: {e}")
+                        st.error(f"System Error: {e}")
         with confirm_col2:
-            # Yeh Cancel button ab CSS ki wajah se transparent/grey hoga
-            if st.button(" Cancel", use_container_width=True):
+            if st.button("Cancel", type="secondary", use_container_width=True):
                 st.session_state.show_confirm = False
                 st.rerun()
