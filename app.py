@@ -33,12 +33,17 @@ st.markdown("""
     div[data-testid="stMarkdownContainer"] p {
         color: #2c3e50 !important;
     }
-    /* Protect buttons and active tabs from becoming dark */
-    .stButton > button, .stButton > button p, .stButton > button span {
+    /* Protect primary buttons and active tabs from becoming dark */
+    .stButton > button[kind="primary"], .stButton > button[kind="primary"] p {
         color: white !important;
     }
     .stTabs [aria-selected="true"], .stTabs [aria-selected="true"] p, .stTabs [aria-selected="true"] span {
         color: white !important;
+    }
+    
+    /* ======== HIDE "PRESS ENTER TO APPLY" TEXT ======== */
+    div[data-testid="InputInstructions"] {
+        display: none !important;
     }
     /* ==================================================================== */
 
@@ -57,13 +62,22 @@ st.markdown("""
     }
     .stTextInput > div > div > input:focus { border-color: #ff2828 !important; background-color: #ffffff !important; box-shadow: 0 0 0 4px rgba(255, 40, 40, 0.1) !important; }
     
-    .stButton > button {
+    /* PRIMARY BUTTON STYLING (Red theme) */
+    .stButton > button[kind="primary"] {
         background: linear-gradient(45deg, #ff2828, #ff4d4d) !important; color: white !important; border-radius: 12px !important;
         font-weight: 600 !important; letter-spacing: 0.5px !important; font-size: 16px !important; padding: 14px !important;
         border: none !important; box-shadow: 0 4px 15px rgba(255, 40, 40, 0.25) !important; transition: all 0.3s ease !important;
     }
-    .stButton > button:hover { transform: translateY(-3px) !important; box-shadow: 0 8px 25px rgba(255, 40, 40, 0.35) !important; }
+    .stButton > button[kind="primary"]:hover { transform: translateY(-3px) !important; box-shadow: 0 8px 25px rgba(255, 40, 40, 0.35) !important; }
     
+    /* SECONDARY BUTTON STYLING (Cancel Button - Grey & Low Opacity) */
+    .stButton > button[kind="secondary"] {
+        background: transparent !important; color: #7f8c8d !important; border-radius: 12px !important;
+        font-weight: 500 !important; font-size: 16px !important; padding: 14px !important;
+        border: 2px solid #dcdde1 !important; box-shadow: none !important; opacity: 0.6 !important; transition: all 0.3s ease !important;
+    }
+    .stButton > button[kind="secondary"]:hover { opacity: 1 !important; background: #f1f3f5 !important; border-color: #95a5a6 !important; }
+
     .stTabs [data-baseweb="tab-list"] { gap: 8px; padding-bottom: 5px; }
     .stTabs [data-baseweb="tab"] { background-color: #f1f3f5; border-radius: 8px; padding: 10px 18px; color: #495057 !important; font-weight: 500; border: none; }
     .stTabs [aria-selected="true"] { background-color: #ff2828 !important; color: white !important; box-shadow: 0 4px 10px rgba(255, 40, 40, 0.2) !important; }
@@ -140,7 +154,7 @@ def send_email_to_boss(candidate_name, typing_score, wpm, time_taken_sec, mcq_sc
         server.quit()
         return "Success"
     except Exception as e: 
-        return str(e) # Returns exact error for debugging
+        return str(e) 
 
 # --- MCQ DATA ---
 mcq_data = [
@@ -253,7 +267,7 @@ else:
         st.write("#### Typing Assessment (3 Minutes)")
         if not st.session_state.typing_started:
             st.info("Click the button below to start the timer. The text will appear, and you will have 3 minutes to type it accurately.")
-            if st.button("Start Typing Test"):
+            if st.button("Start Typing Test", type="primary"):
                 st.session_state.typing_started = True
                 st.session_state.start_time = time.time()
                 st.rerun()
@@ -304,18 +318,33 @@ else:
 
     st.write("<br>", unsafe_allow_html=True)
 
+    # --- TEST COMPLETION CHECK LOGIC ---
+    # Check if typing is done
+    is_typing_done = st.session_state.typing_started and len(typing_input.strip()) > 0
+    # Check if ALL MCQs have an answer selected
+    are_mcqs_done = all(ans is not None for ans in user_mcq_answers)
+    # Check if Email and Forwarding texts are written
+    is_email_done = len(email_draft.strip()) > 0
+    is_forwarding_done = len(forwarding_logic.strip()) > 0
+
+    # True if candidate has done everything
+    all_tasks_completed = is_typing_done and are_mcqs_done and is_email_done and is_forwarding_done
+
     # --- CENTERED SUBMIT BUTTON & POPUP LOGIC ---
     col1, col2, col3 = st.columns([1, 1.5, 1])
     with col2:
-        if st.button("Submit Assessment", type="primary", use_container_width=True):
-            if not st.session_state.typing_started: st.error("Please complete Typing Test first.")
-            else: st.session_state.show_confirm = True
+        if all_tasks_completed:
+            if st.button("Submit Assessment", type="primary", use_container_width=True):
+                st.session_state.show_confirm = True
+        else:
+            # Jab tak test complete nahi hoga, button nahi dikhega, sirf yeh message aayega
+            st.info("ℹ️ Please complete all 4 sections (Typing, MCQs, Email, and Forwarding) to unlock the Submit button.")
 
     if st.session_state.show_confirm:
         st.warning(" Are you sure you want to submit your final answers?")
         confirm_col1, confirm_col2 = st.columns([1, 1])
         with confirm_col1:
-            if st.button(" Yes, Submit", type="primary", use_container_width=True):
+            if st.button("✔️ Yes, Submit", type="primary", use_container_width=True):
                 with st.spinner("Submitting assessment..."):
                     try:
                         end_time = time.time()
@@ -331,13 +360,23 @@ else:
                         email_status = send_email_to_boss(st.session_state.candidate_name, typing_accuracy, wpm, time_taken_seconds, mcq_score, ai_result)
                         
                         if email_status == "Success":
-                            st.success(" Assessment submitted successfully!")
+                            # Success message aur auto return to home page ka logic
+                            st.success("🎉 Assessment submitted successfully! Returning to home page...")
+                            time.sleep(3) # 3 seconds tak message dikhayega
+                            
+                            # Session variables reset ho jayenge
+                            st.session_state.test_started = False
+                            st.session_state.candidate_name = ""
+                            st.session_state.typing_started = False
+                            st.session_state.start_time = 0
                             st.session_state.show_confirm = False
+                            st.rerun() # Wapas Screen 1 par bhej dega
                         else:
                             st.error(f" Email failed. Error: {email_status}")
                     except Exception as e:
                         st.error(f" System Error: {e}")
         with confirm_col2:
+            # Yeh Cancel button ab CSS ki wajah se transparent/grey hoga
             if st.button(" Cancel", use_container_width=True):
                 st.session_state.show_confirm = False
                 st.rerun()
