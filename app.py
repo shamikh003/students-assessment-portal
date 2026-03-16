@@ -54,7 +54,6 @@ st.markdown("""
         border-radius: 12px !important;
         border-left: 6px solid #ff2828 !important;
         margin-bottom: 15px !important;
-        /* Yeh 4 lines text ko select/copy hone se rokti hain */
         user-select: none !important; 
         -webkit-user-select: none !important;
         -moz-user-select: none !important;
@@ -134,13 +133,21 @@ def calculate_wpm(typed_text, elapsed_seconds):
     return round(words / minutes)
 
 def check_answers_with_ai(email_ans, forward_ans):
+    # NAYA PROMPT YAHAN HAI (Lenient and Roman Urdu Friendly)
     prompt = f"""
-    You are an expert HR Manager evaluating an office assistant candidate. 
+    You are an expert, empathetic HR Manager evaluating an office assistant candidate. 
+    IMPORTANT EVALUATION RULES:
+    1. The candidate may answer in English or Roman Urdu (e.g., "setting me ja kar email forward karden"). Accept both.
+    2. Focus ONLY on the core concept and whether they understand the task.
+    3. Be lenient. Completely IGNORE grammar, spelling mistakes, or unprofessional formatting. Do not deduct marks for poor grammar if the intended meaning is clear.
+    
     Evaluate the two answers below but DO NOT repeat the candidate's text in your response. 
     Only provide a score out of 10 and a strictly 1-line short feedback for each.
+    
     Candidate's Answers:
     1. Client Email Draft: {email_ans}
     2. Gmail Forwarding Process: {forward_ans}
+    
     Format output strictly as:
     - Email Drafting: [Score]/10 - [1-line feedback]
     - Mail Forwarding: [Score]/10 - [1-line feedback]
@@ -330,7 +337,6 @@ else:
                 """
                 components.html(timer_html, height=50)
             
-            # Yahan HTML styling lagayi hai taake text ko koi select hi na kar sake!
             st.markdown(f'<div class="typing-reference">{original_text}</div>', unsafe_allow_html=True)
             typing_input = st.text_area("Type here:", height=150, key="typing", label_visibility="collapsed")
 
