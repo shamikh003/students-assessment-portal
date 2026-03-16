@@ -69,7 +69,7 @@ st.markdown("""
         font-size: 15px !important; background-color: #f8f9fa !important; transition: all 0.3s ease !important;
         text-align: center !important; 
         color: #2c3e50 !important;
-        caret-color: #ff2828 !important; /* 🔥 CURSOR FIX 🔥 */
+        caret-color: #ff2828 !important;
     }
     .stTextInput > div > div > input:focus { border-color: #ff2828 !important; background-color: #ffffff !important; box-shadow: 0 0 0 4px rgba(255, 40, 40, 0.1) !important; }
     
@@ -99,7 +99,7 @@ st.markdown("""
         border-radius: 12px !important; border: 2px solid #e1e8ed !important; padding: 15px !important; 
         background-color: #fbfbfc !important; 
         color: #2c3e50 !important; 
-        caret-color: #ff2828 !important; /* 🔥 CURSOR FIX 🔥 */
+        caret-color: #ff2828 !important;
     }
     .stTextArea textarea:focus { border-color: #ff2828 !important; box-shadow: 0 0 0 4px rgba(255, 40, 40, 0.1) !important; }
     </style>
@@ -274,7 +274,12 @@ else:
     header_col1, header_col2 = st.columns([5.5, 1.5], gap="small")
     
     with header_col1:
-        st.markdown(f"<h3 style='margin-top: 5px !important; margin-bottom: 0px !important;'>Welcome, {st.session_state.candidate_name}</h3>", unsafe_allow_html=True)
+        # 🔥 Yahan Flexbox lagaya gaya hai taake Text aur Logo perfectly center mein aayen 🔥
+        st.markdown(f"""
+            <div style='display: flex; align-items: center; height: 120px;'>
+                <h3 style='margin: 0 !important; padding: 0 !important;'>Welcome, {st.session_state.candidate_name}</h3>
+            </div>
+        """, unsafe_allow_html=True)
     
     with header_col2:
         if os.path.exists("logo.png"):
@@ -311,7 +316,7 @@ else:
                     var timeLeft = 180;
                     var timerId = setInterval(countdown, 1000);
                     
-                    // --- ANTI CHEAT SYSTEM (Prevent Paste & Drop) ---
+                    // --- ANTI CHEAT SYSTEM ---
                     try {
                         var textAreas = window.parent.document.querySelectorAll('textarea');
                         if (textAreas.length > 0) {
@@ -373,7 +378,7 @@ else:
 
     all_tasks_completed = is_typing_done and is_email_done and is_forwarding_done
 
-    # --- LIVE PROGRESS TRACKER (NO EMOJIS, COLOR FIXED) ---
+    # --- LIVE PROGRESS TRACKER ---
     st.markdown("<hr style='margin: 5px 0px 15px 0px; border: none; border-bottom: 1px solid #e1e8ed;'>", unsafe_allow_html=True)
     st.markdown("<div style='text-align: center; font-weight: 500; color: #495057; margin-bottom: 15px;'>Assessment Progress:</div>", unsafe_allow_html=True)
     
