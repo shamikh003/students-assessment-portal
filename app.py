@@ -7,6 +7,7 @@ from email.mime.multipart import MIMEMultipart
 import difflib
 import time
 import os
+import random
 
 # --- PAGE CONFIGURATION ---
 st.set_page_config(page_title="Students Solution - Assessment", layout="centered")
@@ -120,12 +121,21 @@ RECEIVER_EMAIL = "muhammadshamikh724@gmail.com"
 genai.configure(api_key=GEMINI_API_KEY)
 model = genai.GenerativeModel('gemini-2.5-flash')
 
+# --- PARAGRAPH BANK ---
+typing_paragraphs = [
+    "Welcome to the typing test. As an office assistant, your main tasks will include answering phone calls, organizing files, and responding to emails. Good typing speed helps you finish your work faster and with fewer mistakes. Please type carefully and pay attention to spelling and punctuation. We are glad to have you take this test today. Take a deep breath, focus on the screen, and do your best. Good luck with your assessment!",
+    "Effective communication is a vital skill in any professional environment. Writing clear and concise emails ensures that your message is understood by clients and colleagues alike. When drafting corporate documents, formatting is just as important as the content. Attention to detail can save the company time and prevent unnecessary misunderstandings. Always proofread your work before hitting the send button.",
+    "Time management and organizational skills are essential for success in this role. You will be expected to handle multiple tasks efficiently, such as scheduling meetings, maintaining digital records, and managing daily correspondence. Prioritizing your workload will help you stay focused during busy office hours. A reliable assistant keeps the entire team running smoothly and effectively without missing any deadlines.",
+    "Customer service is the heart of our business. Whenever you interact with clients, it is important to maintain a polite and professional tone. Listening carefully to their requests allows you to provide the best possible solutions. Remember that you represent the company's image with every email you send and every call you receive. Consistency and empathy are the keys to building long-lasting client relationships."
+]
+
 # --- SESSION STATE INITIALIZATION ---
 if "test_started" not in st.session_state: st.session_state.test_started = False
 if "candidate_name" not in st.session_state: st.session_state.candidate_name = ""
 if "typing_started" not in st.session_state: st.session_state.typing_started = False
 if "start_time" not in st.session_state: st.session_state.start_time = 0
 if "show_confirm" not in st.session_state: st.session_state.show_confirm = False
+if "assigned_paragraph" not in st.session_state: st.session_state.assigned_paragraph = ""
 
 # --- HELPER FUNCTIONS ---
 def calculate_typing_accuracy(original, typed):
@@ -205,8 +215,6 @@ mcq_data = [
     {"q": "20. How do you wrap text within a single cell in MS Excel so it fits nicely?", "options": ["Format Cells -> Wrap Text", "View -> Wrap", "Insert -> Text Wrap", "Data -> Wrap"], "answer": "Format Cells -> Wrap Text"}
 ]
 
-original_text = "Welcome to the typing test. As an office assistant, your main tasks will include answering phone calls, organizing files, and responding to emails. Good typing speed helps you finish your work faster and with fewer mistakes. Please type carefully and pay attention to spelling and punctuation. We are glad to have you take this test today. Take a deep breath, focus on the screen, and do your best. Good luck with your assessment!"
-
 # ==========================================
 # --- FRONTEND UI (SCREEN 1: WELCOME) ---
 # ==========================================
@@ -240,6 +248,8 @@ if not st.session_state.test_started:
             else:
                 st.session_state.candidate_name = name_input
                 st.session_state.test_started = True
+                # Start hote hi random paragraph select karo
+                st.session_state.assigned_paragraph = random.choice(typing_paragraphs)
                 st.rerun()
 
 # ==================================================
@@ -274,7 +284,6 @@ else:
     header_col1, header_col2 = st.columns([5.5, 1.5], gap="small")
     
     with header_col1:
-        # 🔥 Yahan Flexbox lagaya gaya hai taake Text aur Logo perfectly center mein aayen 🔥
         st.markdown(f"""
             <div style='display: flex; align-items: center; height: 120px;'>
                 <h3 style='margin: 0 !important; padding: 0 !important;'>Welcome, {st.session_state.candidate_name}</h3>
@@ -308,7 +317,10 @@ else:
             col_a, col_b = st.columns([3, 1])
             with col_a: st.write("**Type the text below exactly as it appears:**")
             with col_b:
-                timer_html = """
+                # Dynamic timer logic based on paragraph length (margin of error: 10 chars)
+                target_length = len(st.session_state.assigned_paragraph) - 10 
+                
+                timer_html = f"""
                 <div style="text-align: center; font-size: 20px; font-weight: bold; color: white; background: #ff2828; padding: 5px; border-radius: 8px;">
                     Time: <span id="timer">03:00</span>
                 </div>
@@ -317,38 +329,38 @@ else:
                     var timerId = setInterval(countdown, 1000);
                     
                     // --- ANTI CHEAT SYSTEM ---
-                    try {
+                    try {{
                         var textAreas = window.parent.document.querySelectorAll('textarea');
-                        if (textAreas.length > 0) {
+                        if (textAreas.length > 0) {{
                             var ta = textAreas[0];
-                            ta.addEventListener('paste', function(e) { e.preventDefault(); });
-                            ta.addEventListener('drop', function(e) { e.preventDefault(); });
-                        }
-                    } catch(e) {}
+                            ta.addEventListener('paste', function(e) {{ e.preventDefault(); }});
+                            ta.addEventListener('drop', function(e) {{ e.preventDefault(); }});
+                        }}
+                    }} catch(e) {{}}
 
-                    function countdown() {
+                    function countdown() {{
                         var isFinished = false;
-                        try {
+                        try {{
                             var textAreas = window.parent.document.querySelectorAll('textarea');
-                            if (textAreas.length > 0 && textAreas[0].value.length >= 410) {
+                            if (textAreas.length > 0 && textAreas[0].value.length >= {target_length}) {{
                                 isFinished = true;
-                            }
-                        } catch(e) {}
+                            }}
+                        }} catch(e) {{}}
 
-                        if (timeLeft <= 0 || isFinished) { 
+                        if (timeLeft <= 0 || isFinished) {{ 
                             clearTimeout(timerId); 
                             document.getElementById("timer").innerHTML = isFinished ? "Done!" : "00:00"; 
-                        } else {
+                        }} else {{
                             var m = Math.floor(timeLeft / 60); var s = timeLeft % 60;
                             document.getElementById("timer").innerHTML = (m < 10 ? "0" + m : m) + ":" + (s < 10 ? "0" + s : s);
                             timeLeft--;
-                        }
-                    }
+                        }}
+                    }}
                 </script>
                 """
                 components.html(timer_html, height=50)
             
-            st.markdown(f'<div class="typing-reference">{original_text}</div>', unsafe_allow_html=True)
+            st.markdown(f'<div class="typing-reference">{st.session_state.assigned_paragraph}</div>', unsafe_allow_html=True)
             typing_input = st.text_area("Type here:", height=150, key="typing", label_visibility="collapsed")
 
     with tab2:
@@ -427,7 +439,7 @@ else:
                     try:
                         end_time = time.time()
                         time_taken_seconds = end_time - st.session_state.start_time
-                        typing_accuracy = calculate_typing_accuracy(original_text, typing_input)
+                        typing_accuracy = calculate_typing_accuracy(st.session_state.assigned_paragraph, typing_input)
                         wpm = calculate_wpm(typing_input, time_taken_seconds)
                         
                         mcq_score = 0
@@ -446,6 +458,7 @@ else:
                             st.session_state.typing_started = False
                             st.session_state.start_time = 0
                             st.session_state.show_confirm = False
+                            st.session_state.assigned_paragraph = ""
                             st.rerun() 
                         else:
                             st.error(f"Email failed. Error: {email_status}")
