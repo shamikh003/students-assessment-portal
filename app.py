@@ -361,9 +361,7 @@ else:
         if all_tasks_completed:
             if st.button("Submit Assessment", type="primary", use_container_width=True):
                 st.session_state.show_confirm = True
-        else:
-            st.info("Please complete all 4 sections (Typing, MCQs, Email, and Forwarding) to unlock the Submit button.")
-
+      
     if st.session_state.show_confirm:
         st.warning("Are you sure you want to submit your final answers?")
         confirm_col1, confirm_col2 = st.columns([1, 1])
