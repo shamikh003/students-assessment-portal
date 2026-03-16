@@ -34,17 +34,31 @@ st.markdown("""
         color: #2c3e50 !important;
     }
     
-    /* ======== STRICT HIDE "PRESS ENTER / CTRL+ENTER TO APPLY" ======== */
+    /* ======== STRICT HIDE "PRESS ENTER" ======== */
     [data-testid="InputInstructions"], 
     div[data-testid="InputInstructions"],
     .stTextArea [data-testid="InputInstructions"],
     .stTextInput [data-testid="InputInstructions"] {
-        display: none !important;
-        visibility: hidden !important;
-        opacity: 0 !important;
+        display: none !important; visibility: hidden !important; opacity: 0 !important;
     }
-    .stTextArea small, .stTextInput small {
-        display: none !important;
+    .stTextArea small, .stTextInput small { display: none !important; }
+    
+    /* ======== ANTI-CHEAT: UNSELECTABLE REFERENCE TEXT ======== */
+    .typing-reference {
+        font-size: 1.15rem !important;
+        line-height: 1.8 !important;
+        font-weight: 500 !important;
+        color: #2c3e50 !important;
+        background-color: #e8f4f8 !important;
+        padding: 20px 25px !important;
+        border-radius: 12px !important;
+        border-left: 6px solid #ff2828 !important;
+        margin-bottom: 15px !important;
+        /* Yeh 4 lines text ko select/copy hone se rokti hain */
+        user-select: none !important; 
+        -webkit-user-select: none !important;
+        -moz-user-select: none !important;
+        -ms-user-select: none !important;
     }
     /* ==================================================================== */
 
@@ -52,60 +66,29 @@ st.markdown("""
     h4 { font-weight: 500 !important; }
     
     .stTextInput > div > div > input {
-        border-radius: 12px !important;
-        border: 2px solid #e1e8ed !important;
-        padding: 16px 20px !important;
-        font-size: 15px !important;
-        background-color: #f8f9fa !important;
-        transition: all 0.3s ease !important;
-        text-align: center !important; 
-        color: #2c3e50 !important;
+        border-radius: 12px !important; border: 2px solid #e1e8ed !important; padding: 16px 20px !important;
+        font-size: 15px !important; background-color: #f8f9fa !important; transition: all 0.3s ease !important;
+        text-align: center !important; color: #2c3e50 !important;
     }
     .stTextInput > div > div > input:focus { border-color: #ff2828 !important; background-color: #ffffff !important; box-shadow: 0 0 0 4px rgba(255, 40, 40, 0.1) !important; }
     
-    /* ======== PRIMARY BUTTON STYLING (Red theme) ======== */
+    /* ======== PRIMARY BUTTON STYLING ======== */
     button[kind="primary"], button[data-testid="baseButton-primary"] {
-        background: linear-gradient(45deg, #ff2828, #ff4d4d) !important; 
-        color: white !important; 
-        border-radius: 12px !important;
-        font-weight: 600 !important; 
-        letter-spacing: 0.5px !important; 
-        font-size: 16px !important; 
-        padding: 14px !important;
-        border: none !important; 
-        box-shadow: 0 4px 15px rgba(255, 40, 40, 0.25) !important; 
-        transition: all 0.3s ease !important;
+        background: linear-gradient(45deg, #ff2828, #ff4d4d) !important; color: white !important; border-radius: 12px !important;
+        font-weight: 600 !important; letter-spacing: 0.5px !important; font-size: 16px !important; padding: 14px !important;
+        border: none !important; box-shadow: 0 4px 15px rgba(255, 40, 40, 0.25) !important; transition: all 0.3s ease !important;
     }
-    button[kind="primary"]:hover, button[data-testid="baseButton-primary"]:hover { 
-        transform: translateY(-3px) !important; 
-        box-shadow: 0 8px 25px rgba(255, 40, 40, 0.35) !important; 
-    }
-    button[kind="primary"] p, button[data-testid="baseButton-primary"] p {
-        color: white !important;
-    }
+    button[kind="primary"]:hover, button[data-testid="baseButton-primary"]:hover { transform: translateY(-3px) !important; box-shadow: 0 8px 25px rgba(255, 40, 40, 0.35) !important; }
+    button[kind="primary"] p, button[data-testid="baseButton-primary"] p { color: white !important; }
     
-    /* ======== SECONDARY BUTTON STYLING (Cancel Button) ======== */
+    /* ======== SECONDARY BUTTON STYLING ======== */
     button[kind="secondary"], button[data-testid="baseButton-secondary"] {
-        background: transparent !important; 
-        color: #7f8c8d !important; 
-        border-radius: 12px !important;
-        font-weight: 600 !important; 
-        font-size: 16px !important; 
-        padding: 14px !important;
-        border: 2px solid #dcdde1 !important; 
-        box-shadow: none !important; 
-        opacity: 0.6 !important; 
-        transition: all 0.3s ease !important;
+        background: transparent !important; color: #7f8c8d !important; border-radius: 12px !important;
+        font-weight: 600 !important; font-size: 16px !important; padding: 14px !important;
+        border: 2px solid #dcdde1 !important; box-shadow: none !important; opacity: 0.6 !important; transition: all 0.3s ease !important;
     }
-    button[kind="secondary"]:hover, button[data-testid="baseButton-secondary"]:hover { 
-        opacity: 1 !important; 
-        background: #f1f3f5 !important; 
-        border-color: #95a5a6 !important; 
-    }
-    button[kind="secondary"] p, button[data-testid="baseButton-secondary"] p {
-        color: #7f8c8d !important;
-    }
-    /* ==================================================================== */
+    button[kind="secondary"]:hover, button[data-testid="baseButton-secondary"]:hover { opacity: 1 !important; background: #f1f3f5 !important; border-color: #95a5a6 !important; }
+    button[kind="secondary"] p, button[data-testid="baseButton-secondary"] p { color: #7f8c8d !important; }
 
     .stTabs [data-baseweb="tab-list"] { gap: 8px; padding-bottom: 5px; }
     .stTabs [data-baseweb="tab"] { background-color: #f1f3f5; border-radius: 8px; padding: 10px 18px; color: #495057 !important; font-weight: 500; border: none; }
@@ -314,6 +297,17 @@ else:
                 <script>
                     var timeLeft = 180;
                     var timerId = setInterval(countdown, 1000);
+                    
+                    // --- ANTI CHEAT SYSTEM (Prevent Paste & Drop) ---
+                    try {
+                        var textAreas = window.parent.document.querySelectorAll('textarea');
+                        if (textAreas.length > 0) {
+                            var ta = textAreas[0];
+                            ta.addEventListener('paste', function(e) { e.preventDefault(); });
+                            ta.addEventListener('drop', function(e) { e.preventDefault(); });
+                        }
+                    } catch(e) {}
+
                     function countdown() {
                         var isFinished = false;
                         try {
@@ -336,7 +330,8 @@ else:
                 """
                 components.html(timer_html, height=50)
             
-            st.success(original_text) 
+            # Yahan HTML styling lagayi hai taake text ko koi select hi na kar sake!
+            st.markdown(f'<div class="typing-reference">{original_text}</div>', unsafe_allow_html=True)
             typing_input = st.text_area("Type here:", height=150, key="typing", label_visibility="collapsed")
 
     with tab2:
@@ -360,17 +355,48 @@ else:
     st.write("<br>", unsafe_allow_html=True)
 
     # --- TEST COMPLETION CHECK LOGIC ---
-    # Sirf 3 main written tasks zaroori hain. MCQs pe strictness khatam.
     is_typing_done = st.session_state.typing_started and len(typing_input.strip()) > 0
     is_email_done = len(email_draft.strip()) > 0
     is_forwarding_done = len(forwarding_logic.strip()) > 0
 
     all_tasks_completed = is_typing_done and is_email_done and is_forwarding_done
 
+    # --- LIVE PROGRESS TRACKER (NO EMOJIS, COLOR FIXED) ---
+    st.markdown("<hr style='margin: 5px 0px 15px 0px; border: none; border-bottom: 1px solid #e1e8ed;'>", unsafe_allow_html=True)
+    st.markdown("<div style='text-align: center; font-weight: 500; color: #495057; margin-bottom: 15px;'>Assessment Progress:</div>", unsafe_allow_html=True)
+    
+    t_col1, t_col2, t_col3, t_col4 = st.columns(4)
+    with t_col1:
+        status_col = "#27ae60" if is_typing_done else "#e74c3c"
+        status_txt = "Completed" if is_typing_done else "Pending"
+        st.markdown(f"<div style='text-align:center; font-size:14px; color:#2c3e50; font-weight:600;'><span style='color:{status_col};'>{status_txt}</span><br>Typing Test</div>", unsafe_allow_html=True)
+    
+    with t_col2:
+        answered_mcqs = sum(1 for ans in user_mcq_answers if ans is not None)
+        total_mcqs = len(mcq_data)
+        if answered_mcqs == total_mcqs:
+            status_col, status_txt = "#27ae60", "Completed"
+        elif answered_mcqs > 0:
+            status_col, status_txt = "#f39c12", "In Progress"
+        else:
+            status_col, status_txt = "#e74c3c", "Pending"
+        st.markdown(f"<div style='text-align:center; font-size:14px; color:#2c3e50; font-weight:600;'><span style='color:{status_col};'>{status_txt}</span><br>MCQs ({answered_mcqs}/{total_mcqs})</div>", unsafe_allow_html=True)
+    
+    with t_col3:
+        status_col = "#27ae60" if is_email_done else "#e74c3c"
+        status_txt = "Completed" if is_email_done else "Pending"
+        st.markdown(f"<div style='text-align:center; font-size:14px; color:#2c3e50; font-weight:600;'><span style='color:{status_col};'>{status_txt}</span><br>Email Draft</div>", unsafe_allow_html=True)
+    
+    with t_col4:
+        status_col = "#27ae60" if is_forwarding_done else "#e74c3c"
+        status_txt = "Completed" if is_forwarding_done else "Pending"
+        st.markdown(f"<div style='text-align:center; font-size:14px; color:#2c3e50; font-weight:600;'><span style='color:{status_col};'>{status_txt}</span><br>Mail Forwarding</div>", unsafe_allow_html=True)
+        
+    st.write("<br>", unsafe_allow_html=True)
+
     # --- CENTERED SUBMIT BUTTON & POPUP LOGIC ---
     col1, col2, col3 = st.columns([1, 1.5, 1])
     with col2:
-        # Jab required tasks hojayen toh chup chaap Submit Button aajaye
         if all_tasks_completed:
             if st.button("Submit Assessment", type="primary", use_container_width=True):
                 st.session_state.show_confirm = True
