@@ -380,4 +380,73 @@ else:
     t_col1, t_col2, t_col3, t_col4 = st.columns(4)
     with t_col1:
         status_col = "#27ae60" if is_typing_done else "#e74c3c"
-        status_txt = "
+        status_txt = "Completed" if is_typing_done else "Pending"
+        st.markdown(f"<div style='text-align:center; font-size:14px; color:#2c3e50; font-weight:600;'><span style='color:{status_col};'>{status_txt}</span><br>Typing Test</div>", unsafe_allow_html=True)
+    
+    with t_col2:
+        answered_mcqs = sum(1 for ans in user_mcq_answers if ans is not None)
+        total_mcqs = len(mcq_data)
+        if answered_mcqs == total_mcqs:
+            status_col, status_txt = "#27ae60", "Completed"
+        elif answered_mcqs > 0:
+            status_col, status_txt = "#f39c12", "In Progress"
+        else:
+            status_col, status_txt = "#e74c3c", "Pending"
+        st.markdown(f"<div style='text-align:center; font-size:14px; color:#2c3e50; font-weight:600;'><span style='color:{status_col};'>{status_txt}</span><br>MCQs ({answered_mcqs}/{total_mcqs})</div>", unsafe_allow_html=True)
+    
+    with t_col3:
+        status_col = "#27ae60" if is_email_done else "#e74c3c"
+        status_txt = "Completed" if is_email_done else "Pending"
+        st.markdown(f"<div style='text-align:center; font-size:14px; color:#2c3e50; font-weight:600;'><span style='color:{status_col};'>{status_txt}</span><br>Email Draft</div>", unsafe_allow_html=True)
+    
+    with t_col4:
+        status_col = "#27ae60" if is_forwarding_done else "#e74c3c"
+        status_txt = "Completed" if is_forwarding_done else "Pending"
+        st.markdown(f"<div style='text-align:center; font-size:14px; color:#2c3e50; font-weight:600;'><span style='color:{status_col};'>{status_txt}</span><br>Mail Forwarding</div>", unsafe_allow_html=True)
+        
+    st.write("<br>", unsafe_allow_html=True)
+
+    # --- CENTERED SUBMIT BUTTON & POPUP LOGIC ---
+    col1, col2, col3 = st.columns([1, 1.5, 1])
+    with col2:
+        if all_tasks_completed:
+            if st.button("Submit Assessment", type="primary", use_container_width=True):
+                st.session_state.show_confirm = True
+
+    if st.session_state.show_confirm:
+        st.warning("Are you sure you want to submit your final answers?")
+        confirm_col1, confirm_col2 = st.columns([1, 1])
+        with confirm_col1:
+            if st.button("Yes, Submit", type="primary", use_container_width=True):
+                with st.spinner("Submitting assessment..."):
+                    try:
+                        end_time = time.time()
+                        time_taken_seconds = end_time - st.session_state.start_time
+                        typing_accuracy = calculate_typing_accuracy(original_text, typing_input)
+                        wpm = calculate_wpm(typing_input, time_taken_seconds)
+                        
+                        mcq_score = 0
+                        for i, item in enumerate(mcq_data):
+                            if user_mcq_answers[i] == item["answer"]: mcq_score += 1
+                        
+                        ai_result = check_answers_with_ai(email_draft, forwarding_logic)
+                        email_status = send_email_to_boss(st.session_state.candidate_name, typing_accuracy, wpm, time_taken_seconds, mcq_score, ai_result)
+                        
+                        if email_status == "Success":
+                            st.success("Assessment submitted successfully! Returning to home page...")
+                            time.sleep(3) 
+                            
+                            st.session_state.test_started = False
+                            st.session_state.candidate_name = ""
+                            st.session_state.typing_started = False
+                            st.session_state.start_time = 0
+                            st.session_state.show_confirm = False
+                            st.rerun() 
+                        else:
+                            st.error(f"Email failed. Error: {email_status}")
+                    except Exception as e:
+                        st.error(f"System Error: {e}")
+        with confirm_col2:
+            if st.button("Cancel", type="secondary", use_container_width=True):
+                st.session_state.show_confirm = False
+                st.rerun()
