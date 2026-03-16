@@ -358,10 +358,11 @@ else:
     # --- CENTERED SUBMIT BUTTON & POPUP LOGIC ---
     col1, col2, col3 = st.columns([1, 1.5, 1])
     with col2:
+        # Message completely removed. Button only shows if everything is done.
         if all_tasks_completed:
             if st.button("Submit Assessment", type="primary", use_container_width=True):
                 st.session_state.show_confirm = True
-      
+
     if st.session_state.show_confirm:
         st.warning("Are you sure you want to submit your final answers?")
         confirm_col1, confirm_col2 = st.columns([1, 1])
