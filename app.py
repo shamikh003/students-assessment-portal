@@ -84,7 +84,7 @@ st.markdown("""
         color: white !important;
     }
     
-    /* ======== SECONDARY BUTTON STYLING (Cancel Button - Grey & Low Opacity) ======== */
+    /* ======== SECONDARY BUTTON STYLING (Cancel Button) ======== */
     button[kind="secondary"], button[data-testid="baseButton-secondary"] {
         background: transparent !important; 
         color: #7f8c8d !important; 
@@ -294,6 +294,7 @@ else:
 
     with tab1:
         st.write("#### Typing Assessment (3 Minutes)")
+        st.write("*Note: You can submit the assessment anytime even before the timer ends.*")
         if not st.session_state.typing_started:
             st.info("Click the button below to start the timer. The text will appear, and you will have 3 minutes to type it accurately.")
             if st.button("Start Typing Test", type="primary"):
@@ -306,6 +307,7 @@ else:
             col_a, col_b = st.columns([3, 1])
             with col_a: st.write("**Type the text below exactly as it appears:**")
             with col_b:
+                # Timer ab smart ho gaya hai, text complete hone pe khud ruk jayega!
                 timer_html = """
                 <div style="text-align: center; font-size: 20px; font-weight: bold; color: white; background: #ff2828; padding: 5px; border-radius: 8px;">
                     Time: <span id="timer">03:00</span>
@@ -314,8 +316,18 @@ else:
                     var timeLeft = 180;
                     var timerId = setInterval(countdown, 1000);
                     function countdown() {
-                        if (timeLeft <= 0) { clearTimeout(timerId); document.getElementById("timer").innerHTML = "00:00"; } 
-                        else {
+                        var isFinished = false;
+                        try {
+                            var textAreas = window.parent.document.querySelectorAll('textarea');
+                            if (textAreas.length > 0 && textAreas[0].value.length >= 410) {
+                                isFinished = true;
+                            }
+                        } catch(e) {}
+
+                        if (timeLeft <= 0 || isFinished) { 
+                            clearTimeout(timerId); 
+                            document.getElementById("timer").innerHTML = isFinished ? "Done!" : "00:00"; 
+                        } else {
                             var m = Math.floor(timeLeft / 60); var s = timeLeft % 60;
                             document.getElementById("timer").innerHTML = (m < 10 ? "0" + m : m) + ":" + (s < 10 ? "0" + s : s);
                             timeLeft--;
@@ -330,6 +342,7 @@ else:
 
     with tab2:
         st.write("#### MCQs")
+        st.write("*Note: If you don't know an answer, you can skip it.*")
         user_mcq_answers = []
         for i, item in enumerate(mcq_data):
             st.markdown(f"**{item['q']}**")
@@ -348,20 +361,44 @@ else:
     st.write("<br>", unsafe_allow_html=True)
 
     # --- TEST COMPLETION CHECK LOGIC ---
+    answered_mcqs = sum(1 for ans in user_mcq_answers if ans is not None)
+    total_mcqs = len(mcq_data)
+
+    # Sirf 3 main written tasks zaroori hain. MCQs pe strictness khatam!
     is_typing_done = st.session_state.typing_started and len(typing_input.strip()) > 0
-    are_mcqs_done = all(ans is not None for ans in user_mcq_answers)
     is_email_done = len(email_draft.strip()) > 0
     is_forwarding_done = len(forwarding_logic.strip()) > 0
 
-    all_tasks_completed = is_typing_done and are_mcqs_done and is_email_done and is_forwarding_done
+    all_tasks_completed = is_typing_done and is_email_done and is_forwarding_done
+
+    # --- LIVE PROGRESS TRACKER ---
+    st.markdown("<hr style='margin: 5px 0px 15px 0px; border: none; border-bottom: 1px solid #e1e8ed;'>", unsafe_allow_html=True)
+    st.markdown("<div style='text-align: center; font-weight: 500; color: #495057; margin-bottom: 15px;'>Assessment Progress:</div>", unsafe_allow_html=True)
+    
+    t_col1, t_col2, t_col3, t_col4 = st.columns(4)
+    with t_col1:
+        st.markdown(f"<div style='text-align:center; font-size:14px;'>{'🟢' if is_typing_done else '🔴'}<br>Typing Test</div>", unsafe_allow_html=True)
+    with t_col2:
+        # Yellow color for partially filled MCQs, Green for full. It doesn't block the submit button anymore.
+        mcq_icon = '🟢' if answered_mcqs == total_mcqs else ('🟡' if answered_mcqs > 0 else '🔴')
+        st.markdown(f"<div style='text-align:center; font-size:14px;'>{mcq_icon}<br>MCQs ({answered_mcqs}/{total_mcqs})</div>", unsafe_allow_html=True)
+    with t_col3:
+        st.markdown(f"<div style='text-align:center; font-size:14px;'>{'🟢' if is_email_done else '🔴'}<br>Email Draft</div>", unsafe_allow_html=True)
+    with t_col4:
+        st.markdown(f"<div style='text-align:center; font-size:14px;'>{'🟢' if is_forwarding_done else '🔴'}<br>Forwarding</div>", unsafe_allow_html=True)
+        
+    st.write("<br>", unsafe_allow_html=True)
 
     # --- CENTERED SUBMIT BUTTON & POPUP LOGIC ---
     col1, col2, col3 = st.columns([1, 1.5, 1])
     with col2:
-        # Message completely removed. Button only shows if everything is done.
+        # Jab required tasks hojayen toh chup chaap Submit Button aajaye
         if all_tasks_completed:
             if st.button("Submit Assessment", type="primary", use_container_width=True):
                 st.session_state.show_confirm = True
+        else:
+            # Jab incomplete ho, toh screen bilkul saaf (khali) rahay
+            pass
 
     if st.session_state.show_confirm:
         st.warning("Are you sure you want to submit your final answers?")
