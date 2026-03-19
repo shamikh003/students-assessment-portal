@@ -83,22 +83,14 @@ st.markdown("""
     button[kind="primary"]:hover, button[data-testid="baseButton-primary"]:hover { transform: translateY(-3px) !important; box-shadow: 0 8px 25px rgba(255, 40, 40, 0.35) !important; }
     button[kind="primary"] p, button[data-testid="baseButton-primary"] p { color: white !important; }
     
-    /* ======== SECONDARY BUTTON STYLING (SUPER STRICT) ======== */
-    button[kind="secondary"], 
-    button[data-testid="baseButton-secondary"],
-    div[data-testid="stButton"] > button:not([kind="primary"]) {
+    /* ======== SECONDARY BUTTON STYLING (PURANA WALA) ======== */
+    button[kind="secondary"], button[data-testid="baseButton-secondary"] {
         background: transparent !important; color: #7f8c8d !important; border-radius: 12px !important;
         font-weight: 600 !important; font-size: 16px !important; padding: 14px !important;
-        border: 2px solid #dcdde1 !important; box-shadow: none !important; opacity: 0.7 !important; transition: all 0.3s ease !important;
+        border: 2px solid #dcdde1 !important; box-shadow: none !important; opacity: 0.6 !important; transition: all 0.3s ease !important;
     }
-    button[kind="secondary"]:hover, 
-    button[data-testid="baseButton-secondary"]:hover,
-    div[data-testid="stButton"] > button:not([kind="primary"]):hover { 
-        opacity: 1 !important; background: #f1f3f5 !important; border-color: #95a5a6 !important; color: #2c3e50 !important;
-    }
-    button[kind="secondary"] p, 
-    button[data-testid="baseButton-secondary"] p,
-    div[data-testid="stButton"] > button:not([kind="primary"]) p { color: #7f8c8d !important; }
+    button[kind="secondary"]:hover, button[data-testid="baseButton-secondary"]:hover { opacity: 1 !important; background: #f1f3f5 !important; border-color: #95a5a6 !important; }
+    button[kind="secondary"] p, button[data-testid="baseButton-secondary"] p { color: #7f8c8d !important; }
 
     .stTabs [data-baseweb="tab-list"] { gap: 8px; padding-bottom: 5px; }
     .stTabs [data-baseweb="tab"] { background-color: #f1f3f5; border-radius: 8px; padding: 10px 18px; color: #495057 !important; font-weight: 500; border: none; }
@@ -144,7 +136,7 @@ if "typing_started" not in st.session_state: st.session_state.typing_started = F
 if "start_time" not in st.session_state: st.session_state.start_time = 0
 if "show_confirm" not in st.session_state: st.session_state.show_confirm = False
 if "assigned_paragraph" not in st.session_state: st.session_state.assigned_paragraph = ""
-if "final_typing_time" not in st.session_state: st.session_state.final_typing_time = 0 # 🔥 Naya Time Freezer 🔥
+if "final_typing_time" not in st.session_state: st.session_state.final_typing_time = 0 
 
 # --- HELPER FUNCTIONS ---
 def calculate_typing_accuracy(original, typed):
@@ -200,33 +192,7 @@ def send_email_to_boss(candidate_name, typing_score, wpm, time_taken_sec, mcq_sc
     except Exception as e: 
         return str(e) 
 
-# --- MCQ DATA ---
-mcq_data = [
-    {"q": "1. What is the default font used in MS Word (2007 and later)?", "options": ["Times New Roman", "Arial", "Calibri", "Comic Sans"], "answer": "Calibri"},
-    {"q": "2. In MS Word, which feature allows you to create a list with dots or symbols?", "options": ["Numbering", "Bullets", "Indentation", "Margins"], "answer": "Bullets"},
-    {"q": "3. What is the keyboard shortcut for 'Undo' in MS Office applications?", "options": ["Ctrl + U", "Ctrl + Z", "Ctrl + Y", "Ctrl + X"], "answer": "Ctrl + Z"},
-    {"q": "4. In MS Word, what is the shortcut key to 'Copy' selected text?", "options": ["Ctrl + C", "Ctrl + X", "Ctrl + P", "Ctrl + V"], "answer": "Ctrl + C"},
-    {"q": "5. Which feature is used in MS Word to send the same letter to multiple people automatically?", "options": ["Macros", "Template", "Mail Merge", "AutoCorrect"], "answer": "Mail Merge"},
-    {"q": "6. What is the shortcut key for 'Center Alignment' in MS Word?", "options": ["Ctrl + C", "Ctrl + E", "Ctrl + A", "Ctrl + J"], "answer": "Ctrl + E"},
-    {"q": "7. Which key is used to check spelling and grammar in MS Word?", "options": ["F5", "F7", "F12", "F2"], "answer": "F7"},
-    {"q": "8. In MS Word, what is the shortcut for inserting a Page Break?", "options": ["Ctrl + Enter", "Shift + Enter", "Alt + Enter", "Space + Enter"], "answer": "Ctrl + Enter"},
-    {"q": "9. Which tab in MS Word contains the 'Watermark' option?", "options": ["Home", "Insert", "Design", "View"], "answer": "Design"},
-    {"q": "10. What is the keyboard shortcut to make text Bold in MS Word?", "options": ["Ctrl + B", "Shift + B", "Alt + B", "Tab + B"], "answer": "Ctrl + B"},
-    {"q": "11. In MS Excel, all formulas must begin with which symbol?", "options": ["+", "@", "=", "#"], "answer": "="},
-    {"q": "12. What is the intersection of a row and a column in MS Excel called?", "options": ["Box", "Cell", "Grid", "Table"], "answer": "Cell"},
-    {"q": "13. In MS Excel, which function is used to add all numbers in a selected range?", "options": ["TOTAL()", "COUNT()", "SUM()", "ADD()"], "answer": "SUM()"},
-    {"q": "14. What is the primary purpose of the VLOOKUP function in Excel?", "options": ["To find related data in a table", "To change text to uppercase", "To create a chart", "To sum vertical cells only"], "answer": "To find related data in a table"},
-    {"q": "15. What is the shortcut to select an entire column in MS Excel?", "options": ["Ctrl + Space", "Shift + Space", "Ctrl + A", "Alt + Space"], "answer": "Ctrl + Space"},
-    {"q": "16. What is the standard file extension for a modern MS Excel workbook?", "options": [".doc", ".xls", ".xlsx", ".pdf"], "answer": ".xlsx"},
-    {"q": "17. In MS Excel, how can you freeze the top row of a spreadsheet so it stays visible while scrolling?", "options": ["Home Tab -> Freeze", "View Tab -> Freeze Panes", "Insert Tab -> Lock Row", "Data Tab -> Freeze"], "answer": "View Tab -> Freeze Panes"},
-    {"q": "18. Which feature in MS Excel automatically fills a series of data (like days of the week or months)?", "options": ["AutoSum", "AutoFill", "AutoFormat", "AutoComplete"], "answer": "AutoFill"},
-    {"q": "19. What is the shortcut key to insert a new worksheet in MS Excel?", "options": ["Shift + F11", "Ctrl + N", "Alt + W", "F12"], "answer": "Shift + F11"},
-    {"q": "20. How do you wrap text within a single cell in MS Excel so it fits nicely?", "options": ["Format Cells -> Wrap Text", "View -> Wrap", "Insert -> Text Wrap", "Data -> Wrap"], "answer": "Format Cells -> Wrap Text"}
-]
-
-# ==========================================
-# --- FRONTEND UI (SCREEN 1: WELCOME) ---
-# ==========================================
+# --- MAIN APP LOGIC ---
 if not st.session_state.test_started:
     st.markdown("""
         <style>
@@ -258,12 +224,9 @@ if not st.session_state.test_started:
                 st.session_state.candidate_name = name_input
                 st.session_state.test_started = True
                 st.session_state.assigned_paragraph = random.choice(typing_paragraphs)
-                st.session_state.final_typing_time = 0 # Reset time
+                st.session_state.final_typing_time = 0 
                 st.rerun()
 
-# ==================================================
-# --- FRONTEND UI (SCREEN 2: ASSESSMENT PORTAL) ---
-# ==================================================
 else:
     st.markdown("""
         <style>
@@ -275,21 +238,17 @@ else:
             margin-top: 2vh !important; 
             max-width: 850px !important; 
         }
-        /* Logo ki setting for Screen 2 */
         [data-testid="stImage"] img {
             object-fit: fill !important;   
             width: 100% !important;        
             height: 120px !important; 
         }
         [data-testid="stImage"] {
-            display: flex; 
-            justify-content: flex-end; 
-            align-items: center; 
+            display: flex; justify-content: flex-end; align-items: center; 
         }
         </style>
     """, unsafe_allow_html=True)
 
-    # --- 1. HEADER SECTION ---
     header_col1, header_col2 = st.columns([5.5, 1.5], gap="small")
     
     with header_col1:
@@ -305,10 +264,8 @@ else:
         else:
             st.markdown("<h4 style='color:#ff2828; text-align:right;'>Students Solution</h4>", unsafe_allow_html=True)
         
-    # --- 2. DIVIDER LINE ---
     st.markdown("<hr style='margin: 10px 0px 15px 0px; border: none; border-bottom: 3px solid #ff2828;'>", unsafe_allow_html=True)
 
-    # --- 3. CONTENT SECTION ---
     tab1, tab2, tab3, tab4 = st.tabs(["Typing Test", "MCQs", "Email Drafting", "Mail Forwarding"])
 
     with tab1:
@@ -326,7 +283,7 @@ else:
             col_a, col_b = st.columns([3, 1])
             with col_a: st.write("**Type the text below exactly as it appears:**")
             with col_b:
-                target_length = len(st.session_state.assigned_paragraph) - 10 
+                target_length = len(st.session_state.assigned_paragraph) - 50 
                 
                 timer_html = f"""
                 <div style="text-align: center; font-size: 20px; font-weight: bold; color: white; background: #ff2828; padding: 5px; border-radius: 8px;">
@@ -336,7 +293,6 @@ else:
                     var timeLeft = 180;
                     var timerId = setInterval(countdown, 1000);
                     
-                    // --- ANTI CHEAT SYSTEM ---
                     try {{
                         var textAreas = window.parent.document.querySelectorAll('textarea');
                         if (textAreas.length > 0) {{
@@ -350,7 +306,7 @@ else:
                         var isFinished = false;
                         try {{
                             var textAreas = window.parent.document.querySelectorAll('textarea');
-                            if (textAreas.length > 0 && textAreas[0].value.length >= {target_length}) {{
+                            if (textAreas.length > 0 && textAreas[0].value.trim().length >= {target_length}) {{
                                 isFinished = true;
                             }}
                         }} catch(e) {{}}
@@ -395,19 +351,16 @@ else:
     is_typing_done = False
     
     if st.session_state.typing_started:
-        target_para_len = len(st.session_state.assigned_paragraph) - 15 if st.session_state.assigned_paragraph else 9999
+        target_para_len = len(st.session_state.assigned_paragraph) - 50 if st.session_state.assigned_paragraph else 9999
         
-        # Agar time pehle se freez ho chuka hai
         if st.session_state.final_typing_time > 0:
             is_typing_done = True
         else:
-            # Agar time abhi chal raha hai, toh current elapsed time check karo
             current_elapsed_time = time.time() - st.session_state.start_time
             is_time_up = current_elapsed_time >= 180
             is_text_finished = len(typing_input.strip()) >= target_para_len
             
             if is_time_up or is_text_finished:
-                # Waqt yahin lock kar do!
                 st.session_state.final_typing_time = current_elapsed_time if not is_time_up else 180.0
                 is_typing_done = True
 
@@ -467,7 +420,6 @@ else:
             if st.button("Yes, Submit", type="primary", use_container_width=True):
                 with st.spinner("Submitting assessment..."):
                     try:
-                        # 🔥 YAHAN AB FROZEN TIME USE HOGA 🔥
                         time_taken_seconds = st.session_state.final_typing_time
                         typing_accuracy = calculate_typing_accuracy(st.session_state.assigned_paragraph, typing_input)
                         wpm = calculate_wpm(typing_input, time_taken_seconds)
@@ -487,7 +439,7 @@ else:
                             st.session_state.candidate_name = ""
                             st.session_state.typing_started = False
                             st.session_state.start_time = 0
-                            st.session_state.final_typing_time = 0 # Reset Frozen Time
+                            st.session_state.final_typing_time = 0 
                             st.session_state.show_confirm = False
                             st.session_state.assigned_paragraph = ""
                             st.rerun() 
