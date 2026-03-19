@@ -83,14 +83,22 @@ st.markdown("""
     button[kind="primary"]:hover, button[data-testid="baseButton-primary"]:hover { transform: translateY(-3px) !important; box-shadow: 0 8px 25px rgba(255, 40, 40, 0.35) !important; }
     button[kind="primary"] p, button[data-testid="baseButton-primary"] p { color: white !important; }
     
-    /* ======== SECONDARY BUTTON STYLING ======== */
-    button[kind="secondary"], button[data-testid="baseButton-secondary"] {
+    /* ======== SECONDARY BUTTON STYLING (SUPER STRICT) ======== */
+    button[kind="secondary"], 
+    button[data-testid="baseButton-secondary"],
+    div[data-testid="stButton"] > button:not([kind="primary"]) {
         background: transparent !important; color: #7f8c8d !important; border-radius: 12px !important;
         font-weight: 600 !important; font-size: 16px !important; padding: 14px !important;
-        border: 2px solid #dcdde1 !important; box-shadow: none !important; opacity: 0.6 !important; transition: all 0.3s ease !important;
+        border: 2px solid #dcdde1 !important; box-shadow: none !important; opacity: 0.7 !important; transition: all 0.3s ease !important;
     }
-    button[kind="secondary"]:hover, button[data-testid="baseButton-secondary"]:hover { opacity: 1 !important; background: #f1f3f5 !important; border-color: #95a5a6 !important; }
-    button[kind="secondary"] p, button[data-testid="baseButton-secondary"] p { color: #7f8c8d !important; }
+    button[kind="secondary"]:hover, 
+    button[data-testid="baseButton-secondary"]:hover,
+    div[data-testid="stButton"] > button:not([kind="primary"]):hover { 
+        opacity: 1 !important; background: #f1f3f5 !important; border-color: #95a5a6 !important; color: #2c3e50 !important;
+    }
+    button[kind="secondary"] p, 
+    button[data-testid="baseButton-secondary"] p,
+    div[data-testid="stButton"] > button:not([kind="primary"]) p { color: #7f8c8d !important; }
 
     .stTabs [data-baseweb="tab-list"] { gap: 8px; padding-bottom: 5px; }
     .stTabs [data-baseweb="tab"] { background-color: #f1f3f5; border-radius: 8px; padding: 10px 18px; color: #495057 !important; font-weight: 500; border: none; }
@@ -136,6 +144,7 @@ if "typing_started" not in st.session_state: st.session_state.typing_started = F
 if "start_time" not in st.session_state: st.session_state.start_time = 0
 if "show_confirm" not in st.session_state: st.session_state.show_confirm = False
 if "assigned_paragraph" not in st.session_state: st.session_state.assigned_paragraph = ""
+if "final_typing_time" not in st.session_state: st.session_state.final_typing_time = 0 # 🔥 Naya Time Freezer 🔥
 
 # --- HELPER FUNCTIONS ---
 def calculate_typing_accuracy(original, typed):
@@ -249,6 +258,7 @@ if not st.session_state.test_started:
                 st.session_state.candidate_name = name_input
                 st.session_state.test_started = True
                 st.session_state.assigned_paragraph = random.choice(typing_paragraphs)
+                st.session_state.final_typing_time = 0 # Reset time
                 st.rerun()
 
 # ==================================================
@@ -381,19 +391,25 @@ else:
 
     st.write("<br>", unsafe_allow_html=True)
 
-    # --- NEW STRICT TEST COMPLETION CHECK LOGIC ---
+    # --- TIME FREEZER & COMPLETION LOGIC ---
+    is_typing_done = False
+    
     if st.session_state.typing_started:
-        elapsed_time = time.time() - st.session_state.start_time
         target_para_len = len(st.session_state.assigned_paragraph) - 15 if st.session_state.assigned_paragraph else 9999
         
-        # Condition 1: Has the candidate reached the 3-minute mark?
-        is_time_up = elapsed_time >= 180
-        # Condition 2: Has the candidate completely typed the paragraph?
-        is_text_finished = len(typing_input.strip()) >= target_para_len
-        
-        is_typing_done = is_time_up or is_text_finished
-    else:
-        is_typing_done = False
+        # Agar time pehle se freez ho chuka hai
+        if st.session_state.final_typing_time > 0:
+            is_typing_done = True
+        else:
+            # Agar time abhi chal raha hai, toh current elapsed time check karo
+            current_elapsed_time = time.time() - st.session_state.start_time
+            is_time_up = current_elapsed_time >= 180
+            is_text_finished = len(typing_input.strip()) >= target_para_len
+            
+            if is_time_up or is_text_finished:
+                # Waqt yahin lock kar do!
+                st.session_state.final_typing_time = current_elapsed_time if not is_time_up else 180.0
+                is_typing_done = True
 
     is_email_done = len(email_draft.strip()) > 0
     is_forwarding_done = len(forwarding_logic.strip()) > 0
@@ -451,8 +467,8 @@ else:
             if st.button("Yes, Submit", type="primary", use_container_width=True):
                 with st.spinner("Submitting assessment..."):
                     try:
-                        end_time = time.time()
-                        time_taken_seconds = end_time - st.session_state.start_time
+                        # 🔥 YAHAN AB FROZEN TIME USE HOGA 🔥
+                        time_taken_seconds = st.session_state.final_typing_time
                         typing_accuracy = calculate_typing_accuracy(st.session_state.assigned_paragraph, typing_input)
                         wpm = calculate_wpm(typing_input, time_taken_seconds)
                         
@@ -471,6 +487,7 @@ else:
                             st.session_state.candidate_name = ""
                             st.session_state.typing_started = False
                             st.session_state.start_time = 0
+                            st.session_state.final_typing_time = 0 # Reset Frozen Time
                             st.session_state.show_confirm = False
                             st.session_state.assigned_paragraph = ""
                             st.rerun() 
