@@ -83,7 +83,7 @@ st.markdown("""
     button[kind="primary"]:hover, button[data-testid="baseButton-primary"]:hover { transform: translateY(-3px) !important; box-shadow: 0 8px 25px rgba(255, 40, 40, 0.35) !important; }
     button[kind="primary"] p, button[data-testid="baseButton-primary"] p { color: white !important; }
     
-    /* ======== SECONDARY BUTTON STYLING (PERMANENT GREY) ======== */
+    /* ======== SECONDARY BUTTON STYLING ======== */
     button[kind="secondary"], button[data-testid="baseButton-secondary"] {
         background: transparent !important; color: #7f8c8d !important; border-radius: 12px !important;
         font-weight: 600 !important; font-size: 16px !important; padding: 14px !important;
@@ -129,7 +129,7 @@ typing_paragraphs = [
     "Customer service is the heart of our business. Whenever you interact with clients, it is important to maintain a polite and professional tone. Listening carefully to their requests allows you to provide the best possible solutions. Remember that you represent the company's image with every email you send and every call you receive. Consistency and empathy are the keys to building long-lasting client relationships."
 ]
 
-# --- MCQ DATA (YAHAN MISSING THA, AB WAPAS AAGAYA) ---
+# --- MCQ DATA ---
 mcq_data = [
     {"q": "1. What is the default font used in MS Word (2007 and later)?", "options": ["Times New Roman", "Arial", "Calibri", "Comic Sans"], "answer": "Calibri"},
     {"q": "2. In MS Word, which feature allows you to create a list with dots or symbols?", "options": ["Numbering", "Bullets", "Indentation", "Margins"], "answer": "Bullets"},
@@ -317,21 +317,22 @@ else:
                     is_already_done = "false"
                 if time_left_sec < 0: time_left_sec = 0
 
-                timer_html = f"""
+                # 🔥 SYNTAX ERROR FIXED HERE: Replaced f-string with standard string & .replace() 🔥
+                raw_html = """
                 <div style="text-align: center; font-size: 20px; font-weight: bold; color: white; background: #ff2828; padding: 5px; border-radius: 8px;">
                     Time: <span id="timer">...</span>
                 </div>
                 <script>
-                    var timeLeft = {time_left_sec};
-                    var isAlreadyDone = {is_already_done};
-                    var targetLen = {target_length};
+                    var timeLeft = PLACEHOLDER_TIME;
+                    var isAlreadyDone = PLACEHOLDER_DONE;
+                    var targetLen = PLACEHOLDER_LEN;
 
-                    function formatTime(t) {{
+                    function formatTime(t) {
                         var m = Math.floor(t / 60); var s = t % 60;
                         return (m < 10 ? "0" + m : m) + ":" + (s < 10 ? "0" + s : s);
-                    }}
+                    }
 
                     // --- ANTI CHEAT SYSTEM ---
-                    try {{
+                    try {
                         var textAreas = window.parent.document.querySelectorAll('textarea');
-                        if (textAreas.length > 
+      
