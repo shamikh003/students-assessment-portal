@@ -129,6 +129,30 @@ typing_paragraphs = [
     "Customer service is the heart of our business. Whenever you interact with clients, it is important to maintain a polite and professional tone. Listening carefully to their requests allows you to provide the best possible solutions. Remember that you represent the company's image with every email you send and every call you receive. Consistency and empathy are the keys to building long-lasting client relationships."
 ]
 
+# --- MCQ DATA (YAHAN MISSING THA, AB WAPAS AAGAYA) ---
+mcq_data = [
+    {"q": "1. What is the default font used in MS Word (2007 and later)?", "options": ["Times New Roman", "Arial", "Calibri", "Comic Sans"], "answer": "Calibri"},
+    {"q": "2. In MS Word, which feature allows you to create a list with dots or symbols?", "options": ["Numbering", "Bullets", "Indentation", "Margins"], "answer": "Bullets"},
+    {"q": "3. What is the keyboard shortcut for 'Undo' in MS Office applications?", "options": ["Ctrl + U", "Ctrl + Z", "Ctrl + Y", "Ctrl + X"], "answer": "Ctrl + Z"},
+    {"q": "4. In MS Word, what is the shortcut key to 'Copy' selected text?", "options": ["Ctrl + C", "Ctrl + X", "Ctrl + P", "Ctrl + V"], "answer": "Ctrl + C"},
+    {"q": "5. Which feature is used in MS Word to send the same letter to multiple people automatically?", "options": ["Macros", "Template", "Mail Merge", "AutoCorrect"], "answer": "Mail Merge"},
+    {"q": "6. What is the shortcut key for 'Center Alignment' in MS Word?", "options": ["Ctrl + C", "Ctrl + E", "Ctrl + A", "Ctrl + J"], "answer": "Ctrl + E"},
+    {"q": "7. Which key is used to check spelling and grammar in MS Word?", "options": ["F5", "F7", "F12", "F2"], "answer": "F7"},
+    {"q": "8. In MS Word, what is the shortcut for inserting a Page Break?", "options": ["Ctrl + Enter", "Shift + Enter", "Alt + Enter", "Space + Enter"], "answer": "Ctrl + Enter"},
+    {"q": "9. Which tab in MS Word contains the 'Watermark' option?", "options": ["Home", "Insert", "Design", "View"], "answer": "Design"},
+    {"q": "10. What is the keyboard shortcut to make text Bold in MS Word?", "options": ["Ctrl + B", "Shift + B", "Alt + B", "Tab + B"], "answer": "Ctrl + B"},
+    {"q": "11. In MS Excel, all formulas must begin with which symbol?", "options": ["+", "@", "=", "#"], "answer": "="},
+    {"q": "12. What is the intersection of a row and a column in MS Excel called?", "options": ["Box", "Cell", "Grid", "Table"], "answer": "Cell"},
+    {"q": "13. In MS Excel, which function is used to add all numbers in a selected range?", "options": ["TOTAL()", "COUNT()", "SUM()", "ADD()"], "answer": "SUM()"},
+    {"q": "14. What is the primary purpose of the VLOOKUP function in Excel?", "options": ["To find related data in a table", "To change text to uppercase", "To create a chart", "To sum vertical cells only"], "answer": "To find related data in a table"},
+    {"q": "15. What is the shortcut to select an entire column in MS Excel?", "options": ["Ctrl + Space", "Shift + Space", "Ctrl + A", "Alt + Space"], "answer": "Ctrl + Space"},
+    {"q": "16. What is the standard file extension for a modern MS Excel workbook?", "options": [".doc", ".xls", ".xlsx", ".pdf"], "answer": ".xlsx"},
+    {"q": "17. In MS Excel, how can you freeze the top row of a spreadsheet so it stays visible while scrolling?", "options": ["Home Tab -> Freeze", "View Tab -> Freeze Panes", "Insert Tab -> Lock Row", "Data Tab -> Freeze"], "answer": "View Tab -> Freeze Panes"},
+    {"q": "18. Which feature in MS Excel automatically fills a series of data (like days of the week or months)?", "options": ["AutoSum", "AutoFill", "AutoFormat", "AutoComplete"], "answer": "AutoFill"},
+    {"q": "19. What is the shortcut key to insert a new worksheet in MS Excel?", "options": ["Shift + F11", "Ctrl + N", "Alt + W", "F12"], "answer": "Shift + F11"},
+    {"q": "20. How do you wrap text within a single cell in MS Excel so it fits nicely?", "options": ["Format Cells -> Wrap Text", "View -> Wrap", "Insert -> Text Wrap", "Data -> Wrap"], "answer": "Format Cells -> Wrap Text"}
+]
+
 # --- SESSION STATE INITIALIZATION ---
 if "test_started" not in st.session_state: st.session_state.test_started = False
 if "candidate_name" not in st.session_state: st.session_state.candidate_name = ""
@@ -145,7 +169,7 @@ def calculate_typing_accuracy(original, typed):
     return round(matcher.ratio() * 100, 2)
 
 def calculate_wpm(typed_text, elapsed_seconds):
-    if elapsed_seconds <= 0: elapsed_seconds = 1 # Safety division check
+    if elapsed_seconds <= 0: elapsed_seconds = 1 
     words = len(typed_text.split())
     minutes = elapsed_seconds / 60.0
     return round(words / minutes)
@@ -285,7 +309,6 @@ else:
             with col_b:
                 target_length = len(st.session_state.assigned_paragraph) - 50 
                 
-                # 🔥 PRESENTATION BUG FIX: Accurate Time Sync with Javascript 🔥
                 if st.session_state.final_typing_time > 0:
                     time_left_sec = int(180 - st.session_state.final_typing_time)
                     is_already_done = "true"
@@ -311,75 +334,4 @@ else:
                     // --- ANTI CHEAT SYSTEM ---
                     try {{
                         var textAreas = window.parent.document.querySelectorAll('textarea');
-                        if (textAreas.length > 0) {{
-                            var ta = textAreas[0];
-                            ta.addEventListener('paste', function(e) {{ e.preventDefault(); }});
-                            ta.addEventListener('drop', function(e) {{ e.preventDefault(); }});
-                        }}
-                    }} catch(e) {{}}
-
-                    if (isAlreadyDone) {{
-                        document.getElementById("timer").innerHTML = "Done!";
-                    }} else {{
-                        document.getElementById("timer").innerHTML = formatTime(timeLeft);
-                        var timerId = setInterval(countdown, 1000);
-                        
-                        function countdown() {{
-                            var isFinished = false;
-                            try {{
-                                var textAreas = window.parent.document.querySelectorAll('textarea');
-                                if (textAreas.length > 0 && textAreas[0].value.trim().length >= targetLen) {{
-                                    isFinished = true;
-                                }}
-                            }} catch(e) {{}}
-
-                            if (timeLeft <= 0 || isFinished) {{ 
-                                clearTimeout(timerId); 
-                                document.getElementById("timer").innerHTML = isFinished ? "Done!" : "00:00"; 
-                            }} else {{
-                                timeLeft--;
-                                document.getElementById("timer").innerHTML = formatTime(timeLeft);
-                            }}
-                        }}
-                    }}
-                </script>
-                """
-                components.html(timer_html, height=50)
-            
-            st.markdown(f'<div class="typing-reference">{st.session_state.assigned_paragraph}</div>', unsafe_allow_html=True)
-            typing_input = st.text_area("Type here:", height=150, key="typing", label_visibility="collapsed")
-
-    with tab2:
-        st.write("#### MCQs")
-        st.write("*Note: If you don't know an answer, you can skip it.*")
-        user_mcq_answers = []
-        for i, item in enumerate(mcq_data):
-            st.markdown(f"**{item['q']}**")
-            ans = st.radio("Options", item["options"], key=f"mcq_{i}", index=None, label_visibility="collapsed")
-            user_mcq_answers.append(ans)
-            st.write("---") 
-
-    with tab3:
-        st.write("#### Email Drafting")
-        email_draft = st.text_area("Draft a professional email to a client requesting their missing academic transcripts for a visa application.", height=150, key="email")
-
-    with tab4:
-        st.write("#### Mail Forwarding Setup")
-        forwarding_logic = st.text_area("Explain the process of setting up auto-forwarding in Gmail to forward all incoming emails to a manager.", height=150, key="forwarding")
-
-    st.write("<br>", unsafe_allow_html=True)
-
-    # --- TIME FREEZER & COMPLETION LOGIC ---
-    is_typing_done = False
-    
-    if st.session_state.typing_started:
-        target_para_len = len(st.session_state.assigned_paragraph) - 50 if st.session_state.assigned_paragraph else 9999
-        
-        if st.session_state.final_typing_time > 0:
-            is_typing_done = True
-        else:
-            current_elapsed_time = time.time() - st.session_state.start_time
-            is_time_up = current_elapsed_time >= 180
-            is_text_finished = len(typing_input.strip()) >= target_para_len
-            
-         
+                        if (textAreas.length > 
