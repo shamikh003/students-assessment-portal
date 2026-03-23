@@ -83,7 +83,7 @@ st.markdown("""
     button[kind="primary"]:hover, button[data-testid="baseButton-primary"]:hover { transform: translateY(-3px) !important; box-shadow: 0 8px 25px rgba(255, 40, 40, 0.35) !important; }
     button[kind="primary"] p, button[data-testid="baseButton-primary"] p { color: white !important; }
     
-    /* ======== SECONDARY BUTTON STYLING (PURANA WALA) ======== */
+    /* ======== SECONDARY BUTTON STYLING (PERMANENT GREY) ======== */
     button[kind="secondary"], button[data-testid="baseButton-secondary"] {
         background: transparent !important; color: #7f8c8d !important; border-radius: 12px !important;
         font-weight: 600 !important; font-size: 16px !important; padding: 14px !important;
@@ -145,7 +145,7 @@ def calculate_typing_accuracy(original, typed):
     return round(matcher.ratio() * 100, 2)
 
 def calculate_wpm(typed_text, elapsed_seconds):
-    if not typed_text or elapsed_seconds <= 0: return 0
+    if elapsed_seconds <= 0: elapsed_seconds = 1 # Safety division check
     words = len(typed_text.split())
     minutes = elapsed_seconds / 60.0
     return round(words / minutes)
@@ -285,14 +285,30 @@ else:
             with col_b:
                 target_length = len(st.session_state.assigned_paragraph) - 50 
                 
+                # 🔥 PRESENTATION BUG FIX: Accurate Time Sync with Javascript 🔥
+                if st.session_state.final_typing_time > 0:
+                    time_left_sec = int(180 - st.session_state.final_typing_time)
+                    is_already_done = "true"
+                else:
+                    time_left_sec = int(180 - (time.time() - st.session_state.start_time))
+                    is_already_done = "false"
+                if time_left_sec < 0: time_left_sec = 0
+
                 timer_html = f"""
                 <div style="text-align: center; font-size: 20px; font-weight: bold; color: white; background: #ff2828; padding: 5px; border-radius: 8px;">
-                    Time: <span id="timer">03:00</span>
+                    Time: <span id="timer">...</span>
                 </div>
                 <script>
-                    var timeLeft = 180;
-                    var timerId = setInterval(countdown, 1000);
-                    
+                    var timeLeft = {time_left_sec};
+                    var isAlreadyDone = {is_already_done};
+                    var targetLen = {target_length};
+
+                    function formatTime(t) {{
+                        var m = Math.floor(t / 60); var s = t % 60;
+                        return (m < 10 ? "0" + m : m) + ":" + (s < 10 ? "0" + s : s);
+                    }}
+
+                    // --- ANTI CHEAT SYSTEM ---
                     try {{
                         var textAreas = window.parent.document.querySelectorAll('textarea');
                         if (textAreas.length > 0) {{
@@ -302,22 +318,28 @@ else:
                         }}
                     }} catch(e) {{}}
 
-                    function countdown() {{
-                        var isFinished = false;
-                        try {{
-                            var textAreas = window.parent.document.querySelectorAll('textarea');
-                            if (textAreas.length > 0 && textAreas[0].value.trim().length >= {target_length}) {{
-                                isFinished = true;
-                            }}
-                        }} catch(e) {{}}
+                    if (isAlreadyDone) {{
+                        document.getElementById("timer").innerHTML = "Done!";
+                    }} else {{
+                        document.getElementById("timer").innerHTML = formatTime(timeLeft);
+                        var timerId = setInterval(countdown, 1000);
+                        
+                        function countdown() {{
+                            var isFinished = false;
+                            try {{
+                                var textAreas = window.parent.document.querySelectorAll('textarea');
+                                if (textAreas.length > 0 && textAreas[0].value.trim().length >= targetLen) {{
+                                    isFinished = true;
+                                }}
+                            }} catch(e) {{}}
 
-                        if (timeLeft <= 0 || isFinished) {{ 
-                            clearTimeout(timerId); 
-                            document.getElementById("timer").innerHTML = isFinished ? "Done!" : "00:00"; 
-                        }} else {{
-                            var m = Math.floor(timeLeft / 60); var s = timeLeft % 60;
-                            document.getElementById("timer").innerHTML = (m < 10 ? "0" + m : m) + ":" + (s < 10 ? "0" + s : s);
-                            timeLeft--;
+                            if (timeLeft <= 0 || isFinished) {{ 
+                                clearTimeout(timerId); 
+                                document.getElementById("timer").innerHTML = isFinished ? "Done!" : "00:00"; 
+                            }} else {{
+                                timeLeft--;
+                                document.getElementById("timer").innerHTML = formatTime(timeLeft);
+                            }}
                         }}
                     }}
                 </script>
@@ -360,94 +382,4 @@ else:
             is_time_up = current_elapsed_time >= 180
             is_text_finished = len(typing_input.strip()) >= target_para_len
             
-            if is_time_up or is_text_finished:
-                st.session_state.final_typing_time = current_elapsed_time if not is_time_up else 180.0
-                is_typing_done = True
-
-    is_email_done = len(email_draft.strip()) > 0
-    is_forwarding_done = len(forwarding_logic.strip()) > 0
-
-    all_tasks_completed = is_typing_done and is_email_done and is_forwarding_done
-
-    # --- LIVE PROGRESS TRACKER ---
-    st.markdown("<hr style='margin: 5px 0px 15px 0px; border: none; border-bottom: 1px solid #e1e8ed;'>", unsafe_allow_html=True)
-    st.markdown("<div style='text-align: center; font-weight: 500; color: #495057; margin-bottom: 15px;'>Assessment Progress:</div>", unsafe_allow_html=True)
-    
-    t_col1, t_col2, t_col3, t_col4 = st.columns(4)
-    with t_col1:
-        if is_typing_done:
-            status_col, status_txt = "#27ae60", "Completed"
-        elif st.session_state.typing_started:
-            status_col, status_txt = "#f39c12", "In Progress"
-        else:
-            status_col, status_txt = "#e74c3c", "Pending"
-        st.markdown(f"<div style='text-align:center; font-size:14px; color:#2c3e50; font-weight:600;'><span style='color:{status_col};'>{status_txt}</span><br>Typing Test</div>", unsafe_allow_html=True)
-    
-    with t_col2:
-        answered_mcqs = sum(1 for ans in user_mcq_answers if ans is not None)
-        total_mcqs = len(mcq_data)
-        if answered_mcqs == total_mcqs:
-            status_col, status_txt = "#27ae60", "Completed"
-        elif answered_mcqs > 0:
-            status_col, status_txt = "#f39c12", "In Progress"
-        else:
-            status_col, status_txt = "#e74c3c", "Pending"
-        st.markdown(f"<div style='text-align:center; font-size:14px; color:#2c3e50; font-weight:600;'><span style='color:{status_col};'>{status_txt}</span><br>MCQs ({answered_mcqs}/{total_mcqs})</div>", unsafe_allow_html=True)
-    
-    with t_col3:
-        status_col = "#27ae60" if is_email_done else "#e74c3c"
-        status_txt = "Completed" if is_email_done else "Pending"
-        st.markdown(f"<div style='text-align:center; font-size:14px; color:#2c3e50; font-weight:600;'><span style='color:{status_col};'>{status_txt}</span><br>Email Draft</div>", unsafe_allow_html=True)
-    
-    with t_col4:
-        status_col = "#27ae60" if is_forwarding_done else "#e74c3c"
-        status_txt = "Completed" if is_forwarding_done else "Pending"
-        st.markdown(f"<div style='text-align:center; font-size:14px; color:#2c3e50; font-weight:600;'><span style='color:{status_col};'>{status_txt}</span><br>Mail Forwarding</div>", unsafe_allow_html=True)
-        
-    st.write("<br>", unsafe_allow_html=True)
-
-    # --- CENTERED SUBMIT BUTTON & POPUP LOGIC ---
-    col1, col2, col3 = st.columns([1, 1.5, 1])
-    with col2:
-        if all_tasks_completed:
-            if st.button("Submit Assessment", type="primary", use_container_width=True):
-                st.session_state.show_confirm = True
-
-    if st.session_state.show_confirm:
-        st.warning("Are you sure you want to submit your final answers?")
-        confirm_col1, confirm_col2 = st.columns([1, 1])
-        with confirm_col1:
-            if st.button("Yes, Submit", type="primary", use_container_width=True):
-                with st.spinner("Submitting assessment..."):
-                    try:
-                        time_taken_seconds = st.session_state.final_typing_time
-                        typing_accuracy = calculate_typing_accuracy(st.session_state.assigned_paragraph, typing_input)
-                        wpm = calculate_wpm(typing_input, time_taken_seconds)
-                        
-                        mcq_score = 0
-                        for i, item in enumerate(mcq_data):
-                            if user_mcq_answers[i] == item["answer"]: mcq_score += 1
-                        
-                        ai_result = check_answers_with_ai(email_draft, forwarding_logic)
-                        email_status = send_email_to_boss(st.session_state.candidate_name, typing_accuracy, wpm, time_taken_seconds, mcq_score, ai_result)
-                        
-                        if email_status == "Success":
-                            st.success("Assessment submitted successfully! Returning to home page...")
-                            time.sleep(3) 
-                            
-                            st.session_state.test_started = False
-                            st.session_state.candidate_name = ""
-                            st.session_state.typing_started = False
-                            st.session_state.start_time = 0
-                            st.session_state.final_typing_time = 0 
-                            st.session_state.show_confirm = False
-                            st.session_state.assigned_paragraph = ""
-                            st.rerun() 
-                        else:
-                            st.error(f"Email failed. Error: {email_status}")
-                    except Exception as e:
-                        st.error(f"System Error: {e}")
-        with confirm_col2:
-            if st.button("Cancel", type="secondary", use_container_width=True):
-                st.session_state.show_confirm = False
-                st.rerun()
+         
