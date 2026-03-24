@@ -83,7 +83,7 @@ st.markdown("""
     button[kind="primary"]:hover, button[data-testid="baseButton-primary"]:hover { transform: translateY(-3px) !important; box-shadow: 0 8px 25px rgba(255, 40, 40, 0.35) !important; }
     button[kind="primary"] p, button[data-testid="baseButton-primary"] p { color: white !important; }
     
-    /* ======== SECONDARY BUTTON STYLING ======== */
+    /* ======== SECONDARY BUTTON STYLING (PERMANENT GREY) ======== */
     button[kind="secondary"], button[data-testid="baseButton-secondary"] {
         background: transparent !important; color: #7f8c8d !important; border-radius: 12px !important;
         font-weight: 600 !important; font-size: 16px !important; padding: 14px !important;
@@ -121,7 +121,7 @@ RECEIVER_EMAIL = "muhammadshamikh724@gmail.com"
 genai.configure(api_key=GEMINI_API_KEY)
 model = genai.GenerativeModel('gemini-2.5-flash')
 
-# --- PARAGRAPH BANK ---
+# --- PARAGRAPH BANK (GUARANTEED PRESENT IN CODE) ---
 typing_paragraphs = [
     "Welcome to the typing test. As an office assistant, your main tasks will include answering phone calls, organizing files, and responding to emails. Good typing speed helps you finish your work faster and with fewer mistakes. Please type carefully and pay attention to spelling and punctuation. We are glad to have you take this test today. Take a deep breath, focus on the screen, and do your best. Good luck with your assessment!",
     "Effective communication is a vital skill in any professional environment. Writing clear and concise emails ensures that your message is understood by clients and colleagues alike. When drafting corporate documents, formatting is just as important as the content. Attention to detail can save the company time and prevent unnecessary misunderstandings. Always proofread your work before hitting the send button.",
@@ -129,7 +129,7 @@ typing_paragraphs = [
     "Customer service is the heart of our business. Whenever you interact with clients, it is important to maintain a polite and professional tone. Listening carefully to their requests allows you to provide the best possible solutions. Remember that you represent the company's image with every email you send and every call you receive. Consistency and empathy are the keys to building long-lasting client relationships."
 ]
 
-# --- MCQ DATA ---
+# --- MCQ DATA (GUARANTEED PRESENT IN CODE) ---
 mcq_data = [
     {"q": "1. What is the default font used in MS Word (2007 and later)?", "options": ["Times New Roman", "Arial", "Calibri", "Comic Sans"], "answer": "Calibri"},
     {"q": "2. In MS Word, which feature allows you to create a list with dots or symbols?", "options": ["Numbering", "Bullets", "Indentation", "Margins"], "answer": "Bullets"},
@@ -317,7 +317,6 @@ else:
                     is_already_done = "false"
                 if time_left_sec < 0: time_left_sec = 0
 
-                # 🔥 SYNTAX ERROR FIXED HERE: Replaced f-string with standard string & .replace() 🔥
                 raw_html = """
                 <div style="text-align: center; font-size: 20px; font-weight: bold; color: white; background: #ff2828; padding: 5px; border-radius: 8px;">
                     Time: <span id="timer">...</span>
@@ -335,4 +334,130 @@ else:
                     // --- ANTI CHEAT SYSTEM ---
                     try {
                         var textAreas = window.parent.document.querySelectorAll('textarea');
-      
+                        if (textAreas.length > 0) {
+                            var ta = textAreas[0];
+                            ta.addEventListener('paste', function(e) { e.preventDefault(); });
+                            ta.addEventListener('drop', function(e) { e.preventDefault(); });
+                        }
+                    } catch(e) {}
+
+                    if (isAlreadyDone) {
+                        document.getElementById("timer").innerHTML = "Done!";
+                    } else {
+                        document.getElementById("timer").innerHTML = formatTime(timeLeft);
+                        var timerId = setInterval(countdown, 1000);
+                        
+                        function countdown() {
+                            var isFinished = false;
+                            try {
+                                var textAreas = window.parent.document.querySelectorAll('textarea');
+                                if (textAreas.length > 0 && textAreas[0].value.trim().length >= targetLen) {
+                                    isFinished = true;
+                                }
+                            } catch(e) {}
+
+                            if (timeLeft <= 0 || isFinished) { 
+                                clearTimeout(timerId); 
+                                document.getElementById("timer").innerHTML = isFinished ? "Done!" : "00:00"; 
+                            } else {
+                                timeLeft--;
+                                document.getElementById("timer").innerHTML = formatTime(timeLeft);
+                            }
+                        }
+                    }
+                </script>
+                """
+                
+                timer_html = raw_html.replace("PLACEHOLDER_TIME", str(time_left_sec)).replace("PLACEHOLDER_DONE", is_already_done).replace("PLACEHOLDER_LEN", str(target_length))
+                components.html(timer_html, height=50)
+            
+            st.markdown(f'<div class="typing-reference">{st.session_state.assigned_paragraph}</div>', unsafe_allow_html=True)
+            typing_input = st.text_area("Type here:", height=150, key="typing", label_visibility="collapsed")
+
+    with tab2:
+        st.write("#### MCQs")
+        st.write("*Note: If you don't know an answer, you can skip it.*")
+        user_mcq_answers = []
+        for i, item in enumerate(mcq_data):
+            st.markdown(f"**{item['q']}**")
+            ans = st.radio("Options", item["options"], key=f"mcq_{i}", index=None, label_visibility="collapsed")
+            user_mcq_answers.append(ans)
+            st.write("---") 
+
+    with tab3:
+        st.write("#### Email Drafting")
+        email_draft = st.text_area("Draft a professional email to a client requesting their missing academic transcripts for a visa application.", height=150, key="email")
+
+    with tab4:
+        st.write("#### Mail Forwarding Setup")
+        forwarding_logic = st.text_area("Explain the process of setting up auto-forwarding in Gmail to forward all incoming emails to a manager.", height=150, key="forwarding")
+
+    st.write("<br>", unsafe_allow_html=True)
+
+    # --- TIME FREEZER & COMPLETION LOGIC ---
+    is_typing_done = False
+    
+    if st.session_state.typing_started:
+        target_para_len = len(st.session_state.assigned_paragraph) - 50 if st.session_state.assigned_paragraph else 9999
+        
+        if st.session_state.final_typing_time > 0:
+            is_typing_done = True
+        else:
+            current_elapsed_time = time.time() - st.session_state.start_time
+            is_time_up = current_elapsed_time >= 180
+            is_text_finished = len(typing_input.strip()) >= target_para_len
+            
+            if is_time_up or is_text_finished:
+                st.session_state.final_typing_time = current_elapsed_time if not is_time_up else 180.0
+                is_typing_done = True
+
+    is_email_done = len(email_draft.strip()) > 0
+    is_forwarding_done = len(forwarding_logic.strip()) > 0
+
+    all_tasks_completed = is_typing_done and is_email_done and is_forwarding_done
+
+    # --- CENTERED SUBMIT BUTTON & POPUP LOGIC ---
+    col1, col2, col3 = st.columns([1, 1.5, 1])
+    with col2:
+        if all_tasks_completed:
+            if st.button("Submit Assessment", type="primary", use_container_width=True):
+                st.session_state.show_confirm = True
+
+    if st.session_state.show_confirm:
+        st.warning("Are you sure you want to submit your final answers?")
+        confirm_col1, confirm_col2 = st.columns([1, 1])
+        with confirm_col1:
+            if st.button("Yes, Submit", type="primary", use_container_width=True):
+                with st.spinner("Submitting assessment..."):
+                    try:
+                        time_taken_seconds = st.session_state.final_typing_time
+                        typing_accuracy = calculate_typing_accuracy(st.session_state.assigned_paragraph, typing_input)
+                        wpm = calculate_wpm(typing_input, time_taken_seconds)
+                        
+                        mcq_score = 0
+                        for i, item in enumerate(mcq_data):
+                            if user_mcq_answers[i] == item["answer"]: mcq_score += 1
+                        
+                        ai_result = check_answers_with_ai(email_draft, forwarding_logic)
+                        email_status = send_email_to_boss(st.session_state.candidate_name, typing_accuracy, wpm, time_taken_seconds, mcq_score, ai_result)
+                        
+                        if email_status == "Success":
+                            st.success("Assessment submitted successfully! Returning to home page...")
+                            time.sleep(3) 
+                            
+                            st.session_state.test_started = False
+                            st.session_state.candidate_name = ""
+                            st.session_state.typing_started = False
+                            st.session_state.start_time = 0
+                            st.session_state.final_typing_time = 0 
+                            st.session_state.show_confirm = False
+                            st.session_state.assigned_paragraph = ""
+                            st.rerun() 
+                        else:
+                            st.error(f"Email failed. Error: {email_status}")
+                    except Exception as e:
+                        st.error(f"System Error: {e}")
+        with confirm_col2:
+            if st.button("Cancel", type="secondary", use_container_width=True):
+                st.session_state.show_confirm = False
+                st.rerun()
